@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="weldingtable" >
+
+<!-- The following is an exact copy of the ur5_robot.urdf.xacro -->
+  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+
+  <!-- ur5 -->
+  
+  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:arg name="kinematics_config" default="$(find ur_description)/config/ur5_default.yaml"/>
+  <xacro:ur5_robot prefix="" joint_limited="true"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+  />
+
+  <link name="world" />
+<!--
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link = "base_link" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint> -->
+<!-- The copy finished here -->
+
+<!-- There are:-
+     1. The World, everything lives in it.
+     2. The Welding table, our robot arm is installed on it.
+     3. The Kinect V2, RGBD camera provides the point clouds that we need.
+     4. The UR5, our robot arm, with a welding torch as its end effector.
+-->
+
+  <!-- end-effector -->
+  <xacro:include filename="frontorch1d435i2.xacro" />
+
+  <!-- end-effector -->
+  <!-- Here we include the end-effector by setting the parameters -->
+  <!-- TODO: check end-effector link name of robot -->
+  <xacro:frontorch1 prefix="" connected_to="tool0"/>
+
+
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+
+  <xacro:sensor_d435 parent="tool0" use_nominal_extrinsics="false" name="d435i">
+    <origin xyz="-0.03985 -0.0419 0.1825" rpy="1.5708 0 1.5708"/>
+  </xacro:sensor_d435>
+
+
+  <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
+  <xacro:kinect2 prefix=""/>
+
+  <link name="table">
+    <visual>
+      <geometry>
+        <box size="1.0 1.5 0.1"/>
+      </geometry>
+      <material name="Steel">
+        <color rgba="1.0 0.831 0.486 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="1.0 1.5 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="table_to_robot" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="-0.35 0.0 0.065" rpy="0.0 0.0 -1.5708"/>
+  </joint>
+
+
+  <!-- Optical frame -->
+  <link name="kinect2_rgb_optical_frame"/>
+  <joint name="rgb_optical_frame" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="kinect2_link"/> <!-- This link is defined in the kinect2_urdf.xacro file. -->
+    <child link="kinect2_rgb_optical_frame"/>
+  </joint>
+
+    <link name="kinect2_ir_optical_frame"/>
+    <joint name="kinect2_rgb_joint" type="fixed">
+      <origin xyz="-0.0517134766043 0.000128911761804 0.000705039229472" rpy="0.00257173763296 -0.00373970390715 0.00528936886629"/>
+      <parent link="kinect2_rgb_optical_frame"/>
+      <child link="kinect2_ir_optical_frame"/>
+    </joint>
+
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0.35 0.0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+<!-- We do not describe anything between the world and the camera. -->
+  <joint name="world_to_camera" type="fixed">
+    <parent link="world"/>
+    <child link="kinect2_link"/>
+<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="0 3.14159 1.5707"/> -->
+      <origin xyz="0.3865 0.000035 1.1515" rpy="-0.005 3.1414325 1.5707"/>
+<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="-2.9554254 0.1372145 1.5570305"/> -->
+  </joint>
+</robot>

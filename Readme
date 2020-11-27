@@ -1,0 +1,90 @@
+
+ roboweld
+
+ 27 November 2020.
+
+ Changed from experiment back to roboweld.
+ Start to use git and github in vs code.
+ 
+ experiment
+
+ 28 October 2020.
+
+ Copied the perception_node.cpp from 23 Oct 2019 / nrc-welding_ws.
+
+ Before doing anything, to start the Kinect V2 first by
+
+ $ roslaunch kinect2_bridge kinect2_bridge.launch
+
+ Because the URx that I am going to use has the coordinate different from the one that I used
+ therefore, as it is, when cropped some of the table is cropped.
+
+ Not only this but because the X and Y axes exchanged, the algorithm to find the way points
+ does not work. So it is necessary to change the X and Y in that algorithm as well!
+
+ 27 October 2020.
+
+ It has been deceided to leave the Descartes to do trajectory planning for the time being.
+
+ Instead URx will be used. This will incorporate the URx into this package.
+
+ A new folder was placed under src/roboweld_core/ in parallel with src, script. urx is placed
+ in that folder and a new file motion_URx.py is created.
+ 
+ The idea is to go back to more than a year ago, use the Perception node to find the welding
+ groove. Since it is going to use the URx for motion, it is not going to use Descartes anymore.
+
+ 12 October 2020.
+
+ It would be better to plan to the path directly instead of referring to the center of the
+ object.
+
+ Using IK Solvers Other Than KDL With Calibration Data #226
+
+ rosrun xacro xacro -o calibrated.urdf ur5_robot.urdf.xacro kinematics_config:=/<YOUR_PATH>/calibration.yaml
+
+ 5 October 2020.
+
+ The end effector is not going to the center of the workpiece. It will start from the beginning
+ of the trajectory.
+
+ Now the default joint velocity was set to 0.03 radian per second.
+
+ The EEF should find the path first, then move to the first point before starting the trajectory.
+
+ 9 September 2020.
+
+ The moveit_setup_assistant was not working, did not display the robot after loading the model.
+ Cloned the melodic-devel into the roboweld workspace and recompile with catkin_make, it is now
+ working.
+
+ It CAN drive the new UR5. Do not always do this. Test with the RViz simulation whenever
+ possible. Change the ros_controllers.yaml file in the config folder under
+ roboweld_moveit_config to use 
+ action_ns: joint_trajectory_action
+ for simulation.
+
+ It has the RealSense D435i Camera sideway under the torch holder now. Take that away.
+ Actually needs to rearrange according to the old one used in the lab.
+ (1) Change the ur5.urdf.xaxro in the /fmauch_universal_robot/ur_description/urdf:
+    (a) Comment out the wrist_3_passive_joint
+    (b) Comment out the link tool0 at the end of the file
+ (2) Change the roboweldfron1d435i.xacro in the /roboweld_support/urdf
+    (a) 
+
+ 8 September 2020.
+
+ This folder uses the bent torch and drives the real UR5.
+
+ use the command:
+
+ roslaunch roboweld_moveit_config roboweld_planning_execution sim:=false robot_ip:=192.168.0.103
+
+ to drive the real UR5.
+
+ To change it back to simulate in RViz, make sure the ros_controllers:yaml file in the 
+ roboweld_moveit_config/config folder change the action_ns: to
+
+ scaled_pos_traj_controller/follow_joint_trajectory
+
+

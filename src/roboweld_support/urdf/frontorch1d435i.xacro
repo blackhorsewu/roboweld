@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!-- 
+ * This file has been updated on 29 May 2020. The centre line of the torch is now the 
+ * Z axis pointing out.
+ *
+-->
+
+  <!-- Here we define the 2 parameters of the macro -->
+
+  <xacro:macro name="frontorch1" params="prefix connected_to">
+
+    <!-- Import the realsense D435i description -->
+    <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+    <!-- Connect it to the "connected_to" -->
+    <xacro:sensor_d435 parent="${connected_to}" use_nominal_extrinsics="true" name="d435i">
+      <origin xyz="-0.03985 -0.0419 0.1825" rpy="1.5708 0 1.5708"/>
+    </xacro:sensor_d435>
+
+    <!-- Create a fixed joint with a parameterized name. -->
+    <joint name="${prefix}torch_joint" type="fixed">
+      <!-- The parent link must be read from the robot model it is 
+           attached to. In this case it is tool0 -->
+      <parent link="${connected_to}"/>
+      <child link="${prefix}frontorch1"/>
+      <!-- The torch is directly attached to the flange(tool0). -->
+      <origin xyz="0 0.06 0.355" rpy="0 0 0 "/>
+    </joint>
+
+    <link name="${prefix}frontorch1"> <!-- torch1 is the bent torch from Fronious -->
+      <visual>
+        <geometry>
+          <!-- The path to the visual meshes in the package. -->
+          <mesh filename="package://roboweld_support/meshes/collision/frontorch1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+<!--        <origin rpy="${-pi} 0 ${pi}" xyz="0.0 0.0 0.0"/> -->
+        <origin rpy="${pi+0.95993107} -0 ${pi}" xyz="0.0 0.0 0.0"/>
+      </visual>
+      <collision>
+        <geometry>
+          <!-- The path to the collision meshes in the package. -->
+          <mesh filename="package://roboweld_support/meshes/collision/frontorch1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+<!--        <origin rpy="${-pi} 0 ${pi}" xyz="0.0 0.0 0.0"/> -->
+        <origin rpy="${pi+0.95993107} -0 ${pi}" xyz="0.0 0.0 0.0"/>
+      </collision>
+    </link>
+
+    <!-- This is the link for the tail cable of the torch -->
+    <link name="${prefix}tail" >
+      <visual>
+         <geometry>
+           <cylinder length="0.1" radius="0.0125"/>
+         </geometry>
+         <origin xyz="0 -0.07 -0.09" rpy="0 0 0"/>
+      </visual>
+      <collision>
+         <geometry>
+           <cylinder length="0.1" radius="0.0125"/>
+         </geometry>
+         <origin xyz="0 -0.07 -0.09" rpy="0 0 0"/>
+      </collision>
+    </link>
+
+    <!-- This is a fixed joint connecting the cable to the tail of the 
+         torch -->
+    <joint name="${prefix}tail_joint" type="fixed">
+       <origin xyz="0 -0.045 0.007" rpy="0 0 0"/>
+       <parent link="${connected_to}"/>
+       <child link="${prefix}tail"/>
+    </joint>
+
+    <!-- TCP frame -->
+    <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="-0.95993107 0 0"/>
+                        <!-- -ve 55 degrees -->
+      <parent link="${prefix}frontorch1"/>
+      <child link="${prefix}tcp"/>
+    </joint>
+
+    <link name="${prefix}tcp"/>
+
+  </xacro:macro>
+</robot>
