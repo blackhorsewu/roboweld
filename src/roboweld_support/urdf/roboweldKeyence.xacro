@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<!-- 
+  The xacro file for the UR5 holding the Keyence LJ7200 laser scanner as End Effector
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="roboweld" >
+
+  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <!-- ur5 -->
+  
+  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:arg name="kinematics_config" default="$(find ur_description)/config/ur5_default.yaml"/>
+  <xacro:ur5_robot prefix="" joint_limited="true"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+  />
+
+  <link name="world" />
+
+<!-- There are:-
+     1. The World, everything lives in it.
+     2. The Welding table, our robot arm is installed on it.
+     3. The Kinect V2, RGBD camera provides the point clouds that we need.
+     4. The UR5, our robot arm, with the Keyence LJ 7200 as its end effector.
+-->
+
+  <!-- defining tool -->
+  <!-- Keyence LJ 7200 -->
+
+  <xacro:property name="ref_dist_a" value="0.2"/>
+
+  <link name="tool0">  <!-- Actually this is LJ7200 -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://keyence_experimental/meshes/visual/lj_v7200.dae"/>
+      </geometry>
+      <material name="dark grey">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://keyence_experimental/meshes/collision/lj_v7200.stl"/>
+      </geometry>
+      <material name="dark grey">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </collision>
+  </link>
+
+    <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
+      <origin xyz="0.0 0.0 0.0835" rpy="0 ${pi} ${pi/2.0}"/>
+      <parent link="wrist_3_link"/>
+      <child link="tool0"/>
+    </joint>
+
+  <!-- Optical frame -->
+  <link name="lj_v7200_optical_frame"/>
+  <joint name="optical_frame" type="fixed">
+  <!--
+    <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
+  -->  
+    <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    <parent link="tool0"/>
+    <child link="lj_v7200_optical_frame"/>
+  </joint>
+
+
+
+  <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
+  <xacro:kinect2 prefix=""/>
+
+  <link name="table">
+    <visual>
+      <geometry>
+        <box size="1.5 1.0 0.1"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+      <material name="Steel">
+        <color rgba="1.0 0.831 0.486 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="1.5 1.0 0.1"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+    </collision>
+  </link>
+
+  <joint name="table_to_robot" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="-0.6 0.0 0.015" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+
+  <!-- Optical frame -->
+  <link name="kinect2_rgb_optical_frame"/>
+  <joint name="rgb_optical_frame" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="kinect2_link"/> <!-- This link is defined in the kinect2_urdf.xacro file. -->
+    <child link="kinect2_rgb_optical_frame"/>
+  </joint>
+
+    <link name="kinect2_ir_optical_frame"/>
+    <joint name="kinect2_rgb_joint" type="fixed">
+<!--
+      <origin xyz="-0.0517134766043 0.000128911761804 0.000705039229472" rpy="0.00257173763296 -0.00373970390715 0.00528936886629"/>
+-->
+      <origin xyz="-0.0495134766043 0.000128911761804 0.0" rpy="0.00257173763296 -0.00373970390715 0.00528936886629"/>
+      <parent link="kinect2_rgb_optical_frame"/>
+      <child link="kinect2_ir_optical_frame"/>
+    </joint>
+
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0.6 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+
+<!-- We do not describe anything between the world and the camera. -->
+  <joint name="world_to_camera" type="fixed">
+    <parent link="world"/>
+    <child link="kinect2_link"/>
+<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="0 3.14159 1.5707"/>
+      <origin xyz="0.050035 -0.4255 1.1515" rpy="-0.005 3.145 3.155"/>
+      <origin xyz="-0.050035 -0.4255 1.1515" rpy="-0.005 3.145 0.0134"/>
+      <origin xyz="-0.0671726 -0.438413 1.215087" rpy="-0.005 3.145 0.0134"/> -->
+      <origin xyz="0.610 0.00 1.135" rpy="3.144 -0.01 4.71"/>
+<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="-2.9554254 0.1372145 1.5570305"/> -->
+  </joint>
+</robot>
