@@ -26,15 +26,35 @@
      1. The World, everything lives in it.
      2. The Welding table, our robot arm is installed on it.
      3. The Kinect V2, RGBD camera provides the point clouds that we need.
-     4. The UR5, our robot arm, with the Keyence LJ 7200 as its end effector.
+     4. The UR5, our robot arm, with the Straight Fronius Torch as its end effector.
+     5. The Keyence LJ7200 Laser Scanner attached to the torch holder.
+     6. The RealSense D435i attached to the torch holder.
 -->
 
   <!-- defining tool -->
-  <!-- Keyence LJ 7200 -->
+  <!-- Welding torch holder with the Straight Torch -->
 
   <xacro:property name="ref_dist_a" value="0.2"/>
 
-  <link name="tool0">  <!-- Actually this is LJ7200 -->
+  <link name="tool0">  <!-- Actually this is the Fronius Straight Torch held by the holder -->
+      <visual>
+        <geometry>
+          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+          <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+          <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
+      </collision>
+  </link>
+
+<!--
+  <link name="lj_7200">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -60,18 +80,23 @@
       <parent link="wrist_3_link"/>
       <child link="tool0"/>
     </joint>
+-->
 
-  <!-- Optical frame -->
+  <!-- Optical frame 
   <link name="lj_v7200_optical_frame"/>
   <joint name="optical_frame" type="fixed">
-  <!--
     <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
-  -->  
     <origin xyz="0 0 -0.05" rpy="0 0 0"/>
     <parent link="tool0"/>
     <child link="lj_v7200_optical_frame"/>
   </joint>
+-->
 
+    <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
+      <origin xyz="0 -0.105 0.360" rpy="0 0 ${pi}"/>
+      <parent link="wrist_3_link"/>
+      <child link="tool0"/>
+    </joint>
 
 
   <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
