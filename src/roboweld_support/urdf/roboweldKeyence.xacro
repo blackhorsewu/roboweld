@@ -98,6 +98,37 @@
       <child link="tool0"/>
     </joint>
 
+  <!-- This is the link for the tail cable of the torch -->
+  <link name="tail" >
+    <visual>
+       <geometry>
+         <cylinder length="0.1" radius="0.0125"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+         <cylinder length="0.1" radius="0.0125"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="ee_link-tail_fixed_joint" type="fixed">
+     <origin xyz="-0.08 0 0.115" rpy="0 ${pi/2.0} 0"/>
+     <parent link="ee_link"/>
+     <child link="tail"/>
+  </joint>
+
+  <!-- Import the realsense D435i description -->
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+  <xacro:sensor_d435 parent="ee_link" use_nominal_extrinsics="true" name="d435i">
+<!--    
+    <origin xyz="0.16026 0 0.01829" rpy="${pi} ${-pi} ${pi}"/>
+-->
+    <origin xyz="0.18515 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
+
+  </xacro:sensor_d435>
 
   <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
   <xacro:kinect2 prefix=""/>
