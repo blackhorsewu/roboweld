@@ -157,6 +157,11 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          lj_7200:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           shoulder_link:
             Alpha: 1
             Show Axes: false
@@ -319,6 +324,11 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+          lj_7200:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           shoulder_link:
             Alpha: 1
             Show Axes: false
@@ -472,6 +482,8 @@ Visualization Manager:
           Value: false
         kinect2_rgb_optical_frame:
           Value: false
+        lj_7200:
+          Value: true
         shoulder_link:
           Value: false
         table:
@@ -491,7 +503,7 @@ Visualization Manager:
         wrist_2_link:
           Value: false
         wrist_3_link:
-          Value: false
+          Value: true
       Marker Scale: 0.30000001192092896
       Name: TF
       Show Arrows: false
@@ -531,6 +543,8 @@ Visualization Manager:
                                     {}
                             tail:
                               {}
+                          lj_7200:
+                            {}
                           tool0:
                             {}
       Update Interval: 0
@@ -551,25 +565,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 6.107277870178223
+      Distance: 6.8282036781311035
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -5.322142601013184
-        Y: 2.0926547050476074
-        Z: -5.354236236598808e-7
+        X: 0.18276110291481018
+        Y: 6.013039588928223
+        Z: -8.753789870752371e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: -0.02519936114549637
+      Pitch: -0.030199427157640457
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 5.871583938598633
+      Yaw: 4.676562786102295
     Saved: ~
 Window Geometry:
   Camera:
