@@ -1,6 +1,15 @@
 
  roboweld
 
+ 15 December 2020.
+
+ Put the Keyence LJ7200 Laser Scanner on the Straight Fronius Torch holder together with
+ the torch holder.
+
+ Modified the roboweldKeyence.xacro file so that (1) when use the RViz and Planning and 
+ Execution the Interactive Marker moves correctly, (2) the UR5 moves in front of the table
+ instead of at the back of the table.
+
  28 November 2020.
 
  Cloned from Github, use VS Code at home and push back to Github.
