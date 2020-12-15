@@ -152,7 +152,7 @@
   <joint name="table_to_robot" type="fixed">
     <parent link="table"/>
     <child link="base_link"/>
-    <origin xyz="-0.6 0.0 0.015" rpy="0.0 0.0 0.0"/>
+    <origin xyz="-0.6 0.0 0.015" rpy="0.0 0.0 ${pi}"/>
   </joint>
 
 

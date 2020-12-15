@@ -2,7 +2,7 @@
 <launch>
   <arg name="paused" default="false"/>
   <arg name="gazebo_gui" default="true"/>
-  <arg name="urdf_path" default="$(find roboweld_support)/urdf/roboweldfron1d435i.xacro"/>
+  <arg name="urdf_path" default="$(find roboweld_support)/urdf/roboweldKeyence.xacro"/>
 
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
