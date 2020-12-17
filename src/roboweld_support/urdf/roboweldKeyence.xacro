@@ -53,7 +53,7 @@
       </collision>
   </link>
 
-  <link name="lj_7200">
+  <link name="lj_v7200_frame">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -74,21 +74,20 @@
     </collision>
   </link>
 
-  <joint name="wrist_3_link-lj_7200_fixed_joint" type="fixed">
+  <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
     <origin xyz="0.062 -0.105 0.1599" rpy="0 ${pi} ${-pi/2.0}"/>
     <parent link="wrist_3_link"/>
-    <child link="lj_7200"/>
+    <child link="lj_v7200_frame"/>
   </joint>
 
-  <!-- Optical frame 
+  <!-- Optical frame -->
   <link name="lj_v7200_optical_frame"/>
-  <joint name="optical_frame" type="fixed">
+  <joint name="optical_frame_joint" type="fixed">
     <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
-    <origin xyz="0 0 -0.05" rpy="0 0 0"/>
-    <parent link="tool0"/>
+    <parent link="lj_v7200_frame"/>
     <child link="lj_v7200_optical_frame"/>
   </joint>
--->
+
 
     <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
       <origin xyz="0 -0.105 0.360" rpy="0 0 ${pi}"/>

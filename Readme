@@ -1,6 +1,31 @@
 
  roboweld
 
+ 16 December 2020.
+
+ It seems that I have already installed libsocket successfully for the Keyence Laser Scanner
+ LJ7200. The next step will be use it to scan a groove and produce a profile in Point Cloud.
+
+ 1. Start the setupKeyence.launch - this will start the RViz and show the UR5 and let us to 
+    Plan and Execute a pose.
+ 2. If the Kinect V2 can identify a groove then it can drive the torch or the Laser Scanner to 
+    follow the groove
+ 3. Switch on the Laser as if switching on the Welding Torch.
+ 4. At the same time, switch on the RealSense camera to catch another Point Cloud of the same
+    groove.
+ 5. Then we can compare the two, or even three Point Clouds captured by the three different
+    sensors.
+
+ Note: Do not worry about the Descartes for the time being and just use URx to drive the end
+       effector.
+
+ Create a new (ROS) node in roboweld_core and call it scan_node.
+
+ Okay, I miss understood the whole thing! It is not necessary to write a separate node to get
+ a PointCloud from the Keyence Scanner. According to the Readme file, just do a rosrun of the
+ driver node with the _controller_ip will do. It will publish the PointCloud in the 'profiles'
+ topic. Note that nothing will be published if nothing subscribes the topic.
+
  15 December 2020.
 
  Put the Keyence LJ7200 Laser Scanner on the Straight Fronius Torch holder together with
