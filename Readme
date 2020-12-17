@@ -1,6 +1,22 @@
 
  roboweld
 
+ 17 December 2020.
+
+ The Keyence Laser Scanner has been set to the ip address of 192.168.0.5 using the LJ Navigator
+ in Windows. Also there the sampling rate was set to 20 Hz.
+
+ This morning, I also connected the REMOTE of the scanner to the I/O controll relay from the
+ UR5 controll box. This will only switch on the Laser under the control of the program.
+
+ The next step is to put all the one line point clouds into a big point cloud. Each of the 
+ one line point cloud has its reference frame as the optiical frame of the scanner. Before all
+ these one line point clouds be concatinated into one big one, each of them must be transformed
+ to the world coordinate to be consistant.
+
+ Try to work out how this can be done.
+
+
  16 December 2020.
 
  It seems that I have already installed libsocket successfully for the Keyence Laser Scanner
