@@ -1,7 +1,14 @@
 #include <ros/ros.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
+#include <sensor_msgs/PointCloud2.h>
+
+#include <pcl_conversions/pcl_conversions.h>
+#include "pcl_ros/transforms.h"
+#include <pcl_ros/point_cloud.h>
 
 #include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
 
 #include <limits>
 
@@ -27,6 +34,7 @@ const static double KEYENCE_INFINITE_DISTANCE_VALUE_SI2 = -999.9970 / 1e3;
 
 // default values for parameters
 const static std::string DEFAULT_FRAME_ID = "sensor_optical_frame";
+const static std::string DEFAULT_WORLD_FRAME = "world";
 
 // local types
 typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
@@ -227,6 +235,7 @@ int main(int argc, char** argv)
   // ros parameters
   std::string sensor_host;
   std::string frame_id;
+  std::string world_frame;
   std::string sensor_port;
   double sample_rate;
 
@@ -240,6 +249,7 @@ int main(int argc, char** argv)
   pnh.getParam("controller_ip", sensor_host);
   pnh.param<std::string>("controller_port", sensor_port, KEYENCE_DEFAULT_TCP_PORT);
   pnh.param<std::string>("frame_id", frame_id, DEFAULT_FRAME_ID);
+  pnh.param<std::string>("world_frame", world_frame, DEFAULT_WORLD_FRAME);
 
   ROS_INFO("Attempting to connect to %s (TCP %s); expecting a single head attached to port A.",
            sensor_host.c_str(), sensor_port.c_str());
@@ -247,10 +257,18 @@ int main(int argc, char** argv)
   // setup point cloud message (we reuse single one)
   // TODO: this won't work with nodelets
   Cloud::Ptr pc_msg(new Cloud);
+
+  // Another point cloud transformed into the world frame
+  Cloud::Ptr transformed_pc_msg(new Cloud);
+
+  
   pc_msg->header.frame_id = frame_id;
   pc_msg->is_dense = false; // cloud could have NaNs
   // message is essentially a line-strip of points
   pc_msg->height = 1;
+
+  transformed_pc_msg->header.frame_id = world_frame;
+  transformed_pc_msg->is_dense = false;
 
   // set up profile cloud publisher
   ros::Publisher pub = nh.advertise<Cloud>("profiles", 100);
@@ -287,6 +305,9 @@ int main(int argc, char** argv)
 
       ROS_INFO("Keyence connection established");
       ROS_INFO("Attempting to publish at %.2f Hz.", sample_rate);
+
+      sensor_msgs::PointCloud2 transformed_cloud;
+      Cloud transformed_pc_msg_local;
 
       // Main loop
       sleeper.reset();
@@ -325,8 +346,43 @@ int main(int argc, char** argv)
           pc_msg->points.clear();
           unpackProfileToPointCloud(resp.body.profile_info, resp.body.profile_points, *pc_msg, true);
 
+          // Transform the pointcloud from Keyence Optical Frame to World Frame.
+          // Make sure the pc_msg.header.frame_id is changed to world as well.
+          tf::TransformListener listener;
+          tf::StampedTransform  stransform;
+          tf2_ros::Buffer tf_buffer;
+
+          sensor_msgs::PointCloud2 cloud_in;
+
+          try
+          {
+            listener.waitForTransform(world_frame,
+                                      frame_id,
+                                      ros::Time::now(),
+                                      ros::Duration(0.25));
+
+            listener.lookupTransform (world_frame,
+                                      frame_id,
+                                      ros::Time(0),
+                                      stransform);
+
+          }
+          catch(tf::TransformException ex)
+          {
+              ROS_ERROR("%s", ex.what());
+          }
+
+          pcl::toROSMsg(*pc_msg, cloud_in);
+
+          pcl_ros::transformPointCloud(world_frame,
+                                       stransform,
+                                       cloud_in,
+                                       transformed_cloud);
+
+          pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg);
+
           // publish pointcloud
-          pub.publish(pc_msg);
+          pub.publish(transformed_pc_msg);
         }
       } // end main loop
     }
