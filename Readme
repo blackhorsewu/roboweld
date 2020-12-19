@@ -1,6 +1,18 @@
 
  roboweld
 
+ 19 December 2020.
+
+ Now, the profiles from the Keyence Laser Scanner are published in the world frame in one big
+ point cloud.
+
+ At the same time, because the Realsense D435i camera has already been installed and software
+ is also working, just launch the driver will produce the point cloud:
+
+   roslaunch realsense2_camera rs_camera.launch camera:=d435i enable_pointcloud:=true
+
+ This will show the point cloud in RViz.
+
  17 December 2020.
 
  The Keyence Laser Scanner has been set to the ip address of 192.168.0.5 using the LJ Navigator
