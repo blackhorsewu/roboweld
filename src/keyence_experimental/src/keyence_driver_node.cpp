@@ -307,7 +307,7 @@ int main(int argc, char** argv)
       ROS_INFO("Attempting to publish at %.2f Hz.", sample_rate);
 
       sensor_msgs::PointCloud2 transformed_cloud;
-      Cloud transformed_pc_msg_local;
+      Cloud::Ptr transformed_pc_msg_local (new Cloud);
 
       // Main loop
       sleeper.reset();
@@ -359,7 +359,7 @@ int main(int argc, char** argv)
             listener.waitForTransform(world_frame,
                                       frame_id,
                                       ros::Time::now(),
-                                      ros::Duration(0.25));
+                                      ros::Duration(0.22));
 
             listener.lookupTransform (world_frame,
                                       frame_id,
@@ -379,7 +379,9 @@ int main(int argc, char** argv)
                                        cloud_in,
                                        transformed_cloud);
 
-          pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg);
+          pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
+
+          *transformed_pc_msg += *transformed_pc_msg_local;
 
           // publish pointcloud
           pub.publish(transformed_pc_msg);
