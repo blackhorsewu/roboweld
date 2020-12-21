@@ -1,6 +1,27 @@
 
  roboweld
 
+ 21 December 2020.
+
+ I just aware that if the keyence driver node is not stopped by a controll C it will carry on
+ building up the point cloud. That can become very large. 
+
+ There should be a way to detect if the Laser scanner is switched on and off. On second thought
+ this should be done by the program itself and do not need to find out from the scanner.
+
+ Now I have the problem is because the robot and the scanner are not controlled by my program,
+ roboweld, but by the Teach Pandent program. So, for the time being, leave it and just switch
+ on and off the Keyence Driver Node by hand.
+
+ One other observation, the profile given by the scanner will not be perfect if both the USB
+ and the Ethernet are connected. The software in Windows will behave better when the TCP/IP 
+ program is stopped. At the same time, if the the Driver Note is scanning, unplug the USB will
+ give a better profile.
+
+ Start to workout (1) the cross section area. That is the area given by the 1 line profile.
+ (2) the cumulative volumn. That is the cross section area multiplied by the distance travelled.
+ (3) Show both of them interactively in RViz.
+
  19 December 2020.
 
  Now, the profiles from the Keyence Laser Scanner are published in the world frame in one big
