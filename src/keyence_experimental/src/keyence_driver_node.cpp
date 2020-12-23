@@ -39,11 +39,17 @@ const static std::string DEFAULT_WORLD_FRAME = "world";
 // local types
 typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
 
+// Global variable
+double global_x_increment;
+
 // Prototype for function that converts a given profile to
 // a PCL point cloud
 int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
                               const std::vector<int32_t>& points, Cloud& msg, bool cnv_inf_pts);
 
+// Prototype for function that handles the cross section of the groove; returns the cross
+// section area.
+double cross_section(Cloud local_pc); // Input is the local point cloud in PCL format
 
 /**
  * @brief Given a @e client, makes a request to figure out if the given @e program
@@ -309,6 +315,8 @@ int main(int argc, char** argv)
       sensor_msgs::PointCloud2 transformed_cloud;
       Cloud::Ptr transformed_pc_msg_local (new Cloud);
 
+      double cross_section_area;
+
       // Main loop
       sleeper.reset();
       while (ros::ok())
@@ -381,6 +389,11 @@ int main(int argc, char** argv)
 
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
 
+          /* Before joining the line point cloud to the cumulated cloud, find the highest
+             point, display it.
+          */
+          cross_section_area = cross_section(*transformed_pc_msg_local);
+
           *transformed_pc_msg += *transformed_pc_msg_local;
 
           // publish pointcloud
@@ -411,6 +424,8 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
   double x = 0., y = 0., z = 0.;
 
   msg.points.reserve(info.num_profiles);
+
+  global_x_increment = keyence::unitsToMeters(info.x_increment);
 
   // add points
   for (int i = 0; i < static_cast<int>(points.size()); ++i)
@@ -445,4 +460,32 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
   }
 
   return 0;
+}
+
+bool compareHeight(pcl::PointXYZ p1, pcl::PointXYZ p2)
+{
+  return(p1.z < p2.z);
+}
+
+double cross_section(Cloud pointcloud)
+{
+  Cloud local_pc = pointcloud;
+  double area = 0.0;
+
+  // Find out the tallest point of the cloud.
+  sort(local_pc.begin(), local_pc.end(), compareHeight);
+
+  ROS_INFO_STREAM("The Highest Point: " << local_pc[0].z << "\n");
+  ROS_INFO_STREAM("The Lowest Point: " << local_pc[pointcloud.size() - 2].z << "\n");
+
+
+  for (int i = 0; i < static_cast<int>(pointcloud.size()); ++i)
+  {
+    area += (local_pc[i].z - local_pc[pointcloud.size() - 2].z) * global_x_increment;
+  }
+
+  ROS_INFO_STREAM("Global X Increment: " << global_x_increment);
+  ROS_INFO_STREAM("The cross section area: " << area <<"\n");
+
+  return area;
 }

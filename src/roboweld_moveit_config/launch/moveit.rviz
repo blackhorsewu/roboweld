@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Grid1/Offset1
+        - /MotionPlanning1
         - /MotionPlanning1/Scene Robot1
         - /MotionPlanning1/Planning Request1
         - /TF1/Frames1
@@ -50,7 +51,6 @@ Visualization Manager:
       MoveIt_Allow_External_Program: false
       MoveIt_Allow_Replanning: false
       MoveIt_Allow_Sensor_Positioning: false
-      MoveIt_Goal_Tolerance: 0
       MoveIt_Planning_Attempts: 10
       MoveIt_Planning_Time: 5
       MoveIt_Use_Cartesian_Path: false
@@ -225,7 +225,7 @@ Visualization Manager:
         Interactive Marker Size: 0.15000000596046448
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
-        Query Goal State: false
+        Query Goal State: true
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
@@ -568,25 +568,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 1.1730610132217407
+      Distance: 1.9545557498931885
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.6123860478401184
-        Y: 0.13063263893127441
-        Z: -7.105122676875908e-7
+        X: 0.6116575002670288
+        Y: 0.033052846789360046
+        Z: -6.956111064937431e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.41480275988578796
+      Pitch: 0.1848040074110031
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 5.512839317321777
+      Yaw: 6.282807350158691
     Saved: ~
 Window Geometry:
   Camera:
@@ -606,5 +606,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1440
-  X: 373
-  Y: 52
+  X: 479
+  Y: 31

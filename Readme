@@ -1,6 +1,10 @@
 
  roboweld
 
+ 23 December 2020.
+
+ Try to find out and display the height of the plane surface first.
+
  21 December 2020.
 
  I just aware that if the keyence driver node is not stopped by a controll C it will carry on
