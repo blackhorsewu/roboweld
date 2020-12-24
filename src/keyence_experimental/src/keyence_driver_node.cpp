@@ -245,6 +245,8 @@ int main(int argc, char** argv)
   std::string sensor_port;
   double sample_rate;
 
+  double y, oY, thickness, volume = 0.0;
+
   // check required parameters
   if (!pnh.hasParam("controller_ip"))
   {
@@ -316,6 +318,7 @@ int main(int argc, char** argv)
       Cloud::Ptr transformed_pc_msg_local (new Cloud);
 
       double cross_section_area;
+      bool first_line = true;
 
       // Main loop
       sleeper.reset();
@@ -387,6 +390,8 @@ int main(int argc, char** argv)
                                        cloud_in,
                                        transformed_cloud);
 
+          // y = transformed_cloud.points[0].y;
+
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
 
           /* Before joining the line point cloud to the cumulated cloud, find the highest
@@ -394,7 +399,26 @@ int main(int argc, char** argv)
           */
           cross_section_area = cross_section(*transformed_pc_msg_local);
 
+          y = (*transformed_pc_msg_local)[0].y;
+          
+          ROS_INFO_STREAM("y: " << y * 1e3 << "; oY: " << oY * 1e3 << "\n");
+
+          if (first_line)
+          { 
+            oY = y; 
+            first_line = false;
+          }
+
+          thickness = y - oY;
+
+          volume += cross_section_area * thickness;
+
           *transformed_pc_msg += *transformed_pc_msg_local;
+
+          oY = y;
+
+          ROS_INFO_STREAM("Thickness: " << thickness * 1e6 << "mm\n");
+          ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
 
           // publish pointcloud
           pub.publish(transformed_pc_msg);
@@ -462,30 +486,59 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
   return 0;
 }
 
-bool compareHeight(pcl::PointXYZ p1, pcl::PointXYZ p2)
-{
-  return(p1.z < p2.z);
-}
-
 double cross_section(Cloud pointcloud)
 {
-  Cloud local_pc = pointcloud;
   double area = 0.0;
-
-  // Find out the tallest point of the cloud.
-  sort(local_pc.begin(), local_pc.end(), compareHeight);
-
-  ROS_INFO_STREAM("The Highest Point: " << local_pc[0].z << "\n");
-  ROS_INFO_STREAM("The Lowest Point: " << local_pc[pointcloud.size() - 2].z << "\n");
-
-
-  for (int i = 0; i < static_cast<int>(pointcloud.size()); ++i)
+  double volume = 0.0;
+  double highest = -1.0;
+  double lowest = 1.0;
+  double y, oY, z;
+  double height, oHeight;
+  double thickness;
+  int cloudSize = pointcloud.size();
+  
+  for (int i = 0; i < cloudSize; ++i)
   {
-    area += (local_pc[i].z - local_pc[pointcloud.size() - 2].z) * global_x_increment;
+    z = pointcloud[i].z;
+
+    if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
+          && (z != std::numeric_limits<double>::infinity()))
+    {
+      if (z > highest) { highest = z;}
+
+      if (z < lowest) {lowest = z;}
+    }
+  }
+  ROS_INFO_STREAM("The Highest Point: " << highest << "\n");
+  ROS_INFO_STREAM("The Lowest Point: " << lowest << "\n");
+
+  oY = pointcloud[0].y;
+
+  for (int i = 0; i < cloudSize; ++i)
+  {
+    y = pointcloud[i].y;
+    z = pointcloud[i].z;
+
+    if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
+          && (z != std::numeric_limits<double>::infinity()))
+    {
+      height = highest - z;
+      oHeight = height;
+    }
+    else
+    {
+      height = oHeight;
+    }
+    
+    area += height * global_x_increment;
   }
 
-  ROS_INFO_STREAM("Global X Increment: " << global_x_increment);
-  ROS_INFO_STREAM("The cross section area: " << area <<"\n");
+  thickness = y - oY;
+  volume += area * thickness;
+  oY = y;
+  // ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
+  ROS_INFO_STREAM("The cross section area: " << area * 1e6 <<"mm2\n");
+  // ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
 
   return area;
 }
