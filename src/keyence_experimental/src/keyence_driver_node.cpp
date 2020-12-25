@@ -245,7 +245,8 @@ int main(int argc, char** argv)
   std::string sensor_port;
   double sample_rate;
 
-  double y, oY, thickness, volume = 0.0;
+  double y, lastY, thickness;
+  double volume = 0.0;
 
   // check required parameters
   if (!pnh.hasParam("controller_ip"))
@@ -399,25 +400,25 @@ int main(int argc, char** argv)
           */
           cross_section_area = cross_section(*transformed_pc_msg_local);
 
-          y = (*transformed_pc_msg_local)[0].y;
+          y = stransform.getOrigin().y();
           
-          ROS_INFO_STREAM("y: " << y * 1e3 << "; oY: " << oY * 1e3 << "\n");
+          ROS_INFO_STREAM("y: " << y * 1e3 << "mm; lastY: " << lastY * 1e3 << "mm\n");
+          ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
 
           if (first_line)
           { 
-            oY = y; 
+            lastY = y; 
             first_line = false;
           }
 
-          thickness = y - oY;
+          thickness = y - lastY;
 
           volume += cross_section_area * thickness;
 
           *transformed_pc_msg += *transformed_pc_msg_local;
 
-          oY = y;
+          lastY = y;
 
-          ROS_INFO_STREAM("Thickness: " << thickness * 1e6 << "mm\n");
           ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
 
           // publish pointcloud
@@ -489,12 +490,10 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
 double cross_section(Cloud pointcloud)
 {
   double area = 0.0;
-  double volume = 0.0;
   double highest = -1.0;
   double lowest = 1.0;
-  double y, oY, z;
+  double z;
   double height, oHeight;
-  double thickness;
   int cloudSize = pointcloud.size();
   
   for (int i = 0; i < cloudSize; ++i)
@@ -512,11 +511,8 @@ double cross_section(Cloud pointcloud)
   ROS_INFO_STREAM("The Highest Point: " << highest << "\n");
   ROS_INFO_STREAM("The Lowest Point: " << lowest << "\n");
 
-  oY = pointcloud[0].y;
-
   for (int i = 0; i < cloudSize; ++i)
   {
-    y = pointcloud[i].y;
     z = pointcloud[i].z;
 
     if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
@@ -533,12 +529,7 @@ double cross_section(Cloud pointcloud)
     area += height * global_x_increment;
   }
 
-  thickness = y - oY;
-  volume += area * thickness;
-  oY = y;
-  // ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
   ROS_INFO_STREAM("The cross section area: " << area * 1e6 <<"mm2\n");
-  // ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
 
   return area;
 }

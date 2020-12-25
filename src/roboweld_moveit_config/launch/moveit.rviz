@@ -5,10 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Grid1/Offset1
-        - /MotionPlanning1
         - /MotionPlanning1/Scene Robot1
         - /MotionPlanning1/Planning Request1
+        - /PointCloud21
         - /TF1/Frames1
+        - /PointCloud22
       Splitter Ratio: 0.54347825050354
     Tree Height: 973
   - Class: rviz/Help
@@ -225,7 +226,7 @@ Visualization Manager:
         Interactive Marker Size: 0.15000000596046448
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
-        Query Goal State: true
+        Query Goal State: false
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
@@ -405,6 +406,7 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
+        "": true
         Grid: true
         Marker: true
         MarkerArray: true
@@ -435,7 +437,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 1
+      Size (Pixels): 1.5
       Size (m): 0.009999999776482582
       Style: Points
       Topic: /profiles
@@ -552,6 +554,36 @@ Visualization Manager:
                             {}
       Update Interval: 0
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 1
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /kinect2/hd/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -568,7 +600,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 1.9545557498931885
+      Distance: 0.932789146900177
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -583,10 +615,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.1848040074110031
+      Pitch: 0.8448036909103394
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 6.282807350158691
+      Yaw: 0.33961182832717896
     Saved: ~
 Window Geometry:
   Camera:
