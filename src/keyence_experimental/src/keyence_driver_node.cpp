@@ -24,6 +24,14 @@
 
 #include "keyence_experimental/ChangeProgram.h"
 
+// Visual Tools
+#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <rviz_visual_tools/rviz_visual_tools.h>
+
+#include <string>
+
+using namespace std;
+
 // keyence protocol / profile related defines
 static const std::string KEYENCE_DEFAULT_TCP_PORT = "24691";
 static const std::string KEYENCE_DEFAULT_TCP_PORT_HS = "24692";
@@ -320,6 +328,17 @@ int main(int argc, char** argv)
 
       double cross_section_area;
       bool first_line = true;
+
+      // Visual tools
+      namespace rvt = rviz_visual_tools;
+      moveit_visual_tools::MoveItVisualTools visual_tools("world");
+      visual_tools.deleteAllMarkers();
+
+      Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
+      text_pose.translation().x() = 0.70;
+      text_pose.translation().z() = 0.45;
+      visual_tools.publishText(text_pose, "RoboWeld Groove Scanning", rvt::WHITE, rvt::XLARGE, false);
+      visual_tools.trigger();
 
       // Main loop
       sleeper.reset();

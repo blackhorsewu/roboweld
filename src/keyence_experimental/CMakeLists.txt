@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
   std_msgs
+  moveit_visual_tools
+  rviz_visual_tools
 )
 
 ## Driver makes use of the libsocket libraries
