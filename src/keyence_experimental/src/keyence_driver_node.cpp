@@ -253,7 +253,7 @@ int main(int argc, char** argv)
   std::string sensor_port;
   double sample_rate;
 
-  double y, lastY, thickness;
+  double x, y, lastY, z, thickness;
   double volume = 0.0;
 
   // check required parameters
@@ -335,10 +335,19 @@ int main(int argc, char** argv)
       visual_tools.deleteAllMarkers();
 
       Eigen::Isometry3d text_pose = Eigen::Isometry3d::Identity();
-      text_pose.translation().x() = 0.70;
+      text_pose.translation().x() = 0.75;
       text_pose.translation().z() = 0.45;
       visual_tools.publishText(text_pose, "RoboWeld Groove Scanning", rvt::WHITE, rvt::XLARGE, false);
       visual_tools.trigger();
+
+      Eigen::Isometry3d arrow_pose;
+      // rotate along X axis by 45 degrees
+      arrow_pose = Eigen::AngleAxisd(-M_PI/4, Eigen::Vector3d::UnitY());
+
+      // Set Marker Lifetime
+      // visual_tools.setLifetime(0.05);
+      char out_text[100];
+      Eigen::Isometry3d out_text_pose = Eigen::Isometry3d::Identity();
 
       // Main loop
       sleeper.reset();
@@ -419,7 +428,9 @@ int main(int argc, char** argv)
           */
           cross_section_area = cross_section(*transformed_pc_msg_local);
 
+          x = stransform.getOrigin().x();
           y = stransform.getOrigin().y();
+          z = stransform.getOrigin().z();
           
           ROS_INFO_STREAM("y: " << y * 1e3 << "mm; lastY: " << lastY * 1e3 << "mm\n");
           ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
@@ -439,6 +450,39 @@ int main(int argc, char** argv)
           lastY = y;
 
           ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
+
+          /*******************************************************
+           *                                                     *
+           *******************************************************/
+          int n = sprintf(out_text, 
+                      "Cross Section Area: %5.2f mm2\nThickness of slice: %5.2f mm\nVolume of Groove: %5.2f mm3\n",
+                      cross_section_area * 1e6,
+                      thickness * 1e3,
+                      volume * 1e9
+                     );
+
+          out_text_pose.translation().x() = x + 0.15;
+          out_text_pose.translation().y() = y;
+          out_text_pose.translation().z() = z + 0.1;
+
+          visual_tools.publishText(out_text_pose, 
+                                   out_text, 
+                                   rvt::YELLOW,
+                                   rvt::LARGE,
+                                   1
+                                  );
+          // translate x, y, z
+          // arrow_pose.translation() = Eigen::Vector3d(x, y, z);
+          /* visual_tools.publishArrow(
+                                    arrow_pose, 
+                                    rviz_visual_tools::RED, 
+                                    rviz_visual_tools::SMALL,
+                                    0, // length
+                                    1  // increment the id of the arrow
+                                   );
+          */
+          visual_tools.trigger();
+
 
           // publish pointcloud
           pub.publish(transformed_pc_msg);
