@@ -559,6 +559,8 @@ double cross_section(Cloud pointcloud)
   double height, oHeight;
   int cloudSize = pointcloud.size();
   
+  ROS_INFO_STREAM("The x step size: " << global_x_increment * 1e3 << "mm\n");
+
   for (int i = 0; i < cloudSize; ++i)
   {
     z = pointcloud[i].z;
@@ -568,10 +570,14 @@ double cross_section(Cloud pointcloud)
     {
       if (z > highest) { highest = z;}
 
+      ROS_INFO_STREAM("z: " << z * 1e3 << "mm\n");
+
       if (z < lowest) {lowest = z;}
     }
   }
-  ROS_INFO_STREAM("The Highest Point: " << highest << "\n");
+
+  ROS_INFO_STREAM("X step size: " << global_x_increment * 1e3 << "mm\n");
+  ROS_INFO_STREAM("The Highest X Point: " << highest << "\n");
   ROS_INFO_STREAM("The Lowest Point: " << lowest << "\n");
 
   for (int i = 0; i < cloudSize; ++i)
