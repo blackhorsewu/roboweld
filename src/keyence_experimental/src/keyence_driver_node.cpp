@@ -29,6 +29,8 @@
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -550,40 +552,143 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
   return 0;
 }
 
+/*
+ *
+ * 1. Find the difference between the current z and the last z
+ * 2. Find the difference between the current diff and the last diff
+ * 3. Find the biggest diff
+ * 4. Find the smallest diff on either sides of the biggest diff
+ * 5. Find the x1, x2 and z1, z2 of the two smallest diff
+ * 6. Find the line joining the two turning point, i.e. zt = (z1-z2)/(x1 - x2)
+ * 7. 
+ * 
+ */
 double cross_section(Cloud pointcloud)
 {
   double area = 0.0;
   double highest = -1.0;
   double lowest = 1.0;
-  double z;
-  double height, oHeight;
+  double x, x1, x2, z;
+  double lastX, lastZ;
+  double diffZ, lastDiffZ;
+  double doubleDiffZ, lastDoubleDiffZ;
+  double smallestDoubleDiff1, smallestDoubleDiff2;
+  int smallestDoubleDiff1i, smallestDoubleDiff2i, biggestDoubleDiffi;
+  double smallestDoubleDiff1Z, smallestDoubleDiff2Z, biggestDoubleDiffZ;
+  double height, Height;
   int cloudSize = pointcloud.size();
+  // bool writeToFile;
   
   ROS_INFO_STREAM("The x step size: " << global_x_increment * 1e3 << "mm\n");
 
+  // string reply;
+  // using namespace std;
+  // ofstream myfile;
+  // myfile.open("profile.csv");
+
+  // cout << "Do you want to write to a file?\n";
+  // getline(cin, reply);
+  // if (reply == "y")
+  //   { 
+  //     writeToFile = true;
+  //   }
+
+  /* Before the beginning,
+   */
   for (int i = 0; i < cloudSize; ++i)
   {
+    x = pointcloud[i].x;
     z = pointcloud[i].z;
 
     if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
           && (z != std::numeric_limits<double>::infinity()))
     {
+      
       if (z > highest) { highest = z;}
 
-      ROS_INFO_STREAM("z: " << z * 1e3 << "mm\n");
+      // ROS_INFO_STREAM("z: " << z * 1e3 << "mm\n");
+      /*
+      if (writeToFile) 
+      {
+        myfile << z * 1e3 << ",\n"; 
+        ROS_INFO_STREAM("z: " << z * 1e3 << ",\n");
+      } 
+      */
 
       if (z < lowest) {lowest = z;}
     }
+    else
+    {
+      z = lastZ;
+      pointcloud[i].z = z;
+    }
+    
+    
+    if (i > 0) // from 1 onward
+      {
+        diffZ = z - lastZ;
+      }
+
+    if (i > 1) // from 2 onward
+    {
+      doubleDiffZ = diffZ - lastDiffZ;
+
+      if (doubleDiffZ > lastDoubleDiffZ)
+      {
+        biggestDoubleDiffZ = doubleDiffZ;
+        biggestDoubleDiffi = i;
+      }
+
+      if (i < biggestDoubleDiffi) // on the near side
+      {
+        if (doubleDiffZ < smallestDoubleDiff1Z)
+        {
+          smallestDoubleDiff1Z = doubleDiffZ;
+          smallestDoubleDiff1i = i;
+        }
+      }
+
+      if (i > biggestDoubleDiffi) // on the far side
+      {
+        if (doubleDiffZ < smallestDoubleDiff2Z)
+        {
+          smallestDoubleDiff2Z = doubleDiffZ;
+          smallestDoubleDiff2i = i;
+        }
+      }
+    }
+    lastZ = z;
+    lastDiffZ = diffZ;
+    lastDoubleDiffZ = doubleDiffZ;
   }
 
+  // if (writeToFile) { writeToFile = false; };
+
+  ROS_INFO_STREAM("x1: " << smallestDoubleDiff1i * 10 << "\n");
+  ROS_INFO_STREAM("z1: " << pointcloud[smallestDoubleDiff1i].z * 1e3 << "\n");
+
+  ROS_INFO_STREAM("x2: " << smallestDoubleDiff2i * 10 << "\n");
+  ROS_INFO_STREAM("z2: " << pointcloud[smallestDoubleDiff2i].z * 1e3 << "\n");
+
   ROS_INFO_STREAM("X step size: " << global_x_increment * 1e3 << "mm\n");
-  ROS_INFO_STREAM("The Highest X Point: " << highest << "\n");
-  ROS_INFO_STREAM("The Lowest Point: " << lowest << "\n");
+  ROS_INFO_STREAM("The Highest Point: " << highest * 1e3 << "\n");
+  ROS_INFO_STREAM("The Lowest Point: " << lowest * 1e3 << "\n");
 
-  for (int i = 0; i < cloudSize; ++i)
+  double z1 = pointcloud[smallestDoubleDiff1i].z;
+  double z2 = pointcloud[smallestDoubleDiff2i].z;
+  int base = smallestDoubleDiff2i - smallestDoubleDiff1i;
+  double gradient = (z2 - z1)/base;
+  double zT; // z at top
+  double zB; // z at bottom
+
+  for (int i = smallestDoubleDiff1i; i < smallestDoubleDiff2i; ++i)
   {
-    z = pointcloud[i].z;
+    zB = pointcloud[i].z;
+    zT = gradient * (i - smallestDoubleDiff1i);
 
+    /*
+     * changed pointcloud[i] to lastZ so no need the following
+     * 
     if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
           && (z != std::numeric_limits<double>::infinity()))
     {
@@ -594,10 +699,20 @@ double cross_section(Cloud pointcloud)
     {
       height = oHeight;
     }
+    */
     
+    height = zT - zB;
+    
+    if (i == biggestDoubleDiffi)
+    {
+      Height = height;
+    }
+
     area += height * global_x_increment;
   }
 
+  ROS_INFO_STREAM("The Base is: " << base * 10 << "mm\n");
+  ROS_INFO_STREAM("The Height is" << Height * 1e3 << "mm\n");
   ROS_INFO_STREAM("The cross section area: " << area * 1e6 <<"mm2\n");
 
   return area;
