@@ -425,42 +425,38 @@ int main(int argc, char** argv)
 
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
 
-          /* Before joining the line point cloud to the cumulated cloud, find the highest
-             point, display it.
-          */
           cross_section_area = cross_section(*transformed_pc_msg_local);
 
           x = stransform.getOrigin().x();
           y = stransform.getOrigin().y();
           z = stransform.getOrigin().z();
           
-          ROS_INFO_STREAM("y: " << y * 1e3 << "mm; lastY: " << lastY * 1e3 << "mm\n");
-          ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
-
           if (first_line)
           { 
             lastY = y; 
             first_line = false;
           }
+          else
+          { // Not first line
+            ROS_INFO_STREAM("y: " << y * 1e3 << "mm; lastY: " << lastY * 1e3 << "mm\n");
 
-          thickness = y - lastY;
+            thickness = y - lastY;
+            ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
 
-          volume += cross_section_area * thickness;
+            volume += cross_section_area * thickness;
 
-          *transformed_pc_msg += *transformed_pc_msg_local;
+            *transformed_pc_msg += *transformed_pc_msg_local;
+          }
 
           lastY = y;
 
-          ROS_INFO_STREAM("Volume: " << volume * 1e9 << "mm3\n");
+          ROS_INFO_STREAM("Volume: " << volume * 1e3 << "mm3\n");
 
-          /*******************************************************
-           *                                                     *
-           *******************************************************/
           int n = sprintf(out_text, 
                       "Cross Section Area: %5.2f mm2\nThickness of slice: %5.2f mm\nVolume of Groove: %5.2f mm3\n",
-                      cross_section_area * 1e6,
+                      cross_section_area,
                       thickness * 1e3,
-                      volume * 1e9
+                      volume * 1e3
                      );
 
           out_text_pose.translation().x() = x + 0.15;
@@ -515,7 +511,7 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
 
   msg.points.reserve(info.num_profiles);
 
-  global_x_increment = keyence::unitsToMeters(info.x_increment);
+  global_x_increment = keyence::unitsToMeters(info.x_increment) * 1e3;
 
   // add points
   for (int i = 0; i < static_cast<int>(points.size()); ++i)
@@ -566,154 +562,174 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
 double cross_section(Cloud pointcloud)
 {
   double area = 0.0;
-  double highest = -1.0;
-  double lowest = 1.0;
-  double x, x1, x2, z;
-  double lastX, lastZ;
+  double z, lastZ;
   double diffZ, lastDiffZ;
-  double doubleDiffZ, lastDoubleDiffZ;
-  double smallestDoubleDiff1, smallestDoubleDiff2;
-  int smallestDoubleDiff1i, smallestDoubleDiff2i, biggestDoubleDiffi;
-  double smallestDoubleDiff1Z, smallestDoubleDiff2Z, biggestDoubleDiffZ;
+  double doubleDiffZ; // lastDoubleDiffZ;
+  double minDoubleDiff1Z;
+  double minDoubleDiff2Z;
+  double maxDoubleDiffZ;
   double height, Height;
+  int minDoubleDiff1i, minDoubleDiff2i, maxDoubleDiffi;
   int cloudSize = pointcloud.size();
-  // bool writeToFile;
+  // bool writeToFile = false;
+  bool first = true;
+  bool second = false;
+  bool third = false;
   
-  ROS_INFO_STREAM("The x step size: " << global_x_increment * 1e3 << "mm\n");
+  ROS_INFO_STREAM("The x step size: " << global_x_increment << "mm\n");
 
-  // string reply;
-  // using namespace std;
-  // ofstream myfile;
-  // myfile.open("profile.csv");
+  using namespace std;
+  /*
+  ofstream myfile;
+  myfile.open("profile.csv");
+  myfile << "i, Z, Z dot, Z dot dot, Min Z dot dot L, Min Z dot dot L i, Maz Z dot dot, Maz Z dot dot i, Min Z dot dot R, Min Z dot dot R i\n ";
+  */
 
-  // cout << "Do you want to write to a file?\n";
-  // getline(cin, reply);
-  // if (reply == "y")
-  //   { 
-  //     writeToFile = true;
-  //   }
-
-  /* Before the beginning,
-   */
-  for (int i = 0; i < cloudSize; ++i)
+  for (int i = 0; i < (cloudSize - 50); ++i)
   {
-    x = pointcloud[i].x;
-    z = pointcloud[i].z;
+    z = pointcloud[i].z * 1e3;
 
     if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
           && (z != std::numeric_limits<double>::infinity()))
-    {
-      
-      if (z > highest) { highest = z;}
-
-      // ROS_INFO_STREAM("z: " << z * 1e3 << "mm\n");
-      /*
-      if (writeToFile) 
+    {   // then this is a piece of normal data
+      if (first) // from 1st onward
       {
-        myfile << z * 1e3 << ",\n"; 
-        ROS_INFO_STREAM("z: " << z * 1e3 << ",\n");
+        first = false;
+        lastZ = z;
+        /*
+        myfile << i << ", ";
+        myfile << z << "\n";
+        */
+        second = true;
       } 
-      */
-
-      if (z < lowest) {lowest = z;}
-    }
-    else
-    {
-      z = lastZ;
-      pointcloud[i].z = z;
-    }
-    
-    
-    if (i > 0) // from 1 onward
+      else if (second)
       {
+        second = false;
         diffZ = z - lastZ;
-      }
-
-    if (i > 1) // from 2 onward
-    {
-      doubleDiffZ = diffZ - lastDiffZ;
-
-      if (doubleDiffZ > lastDoubleDiffZ)
+        lastDiffZ = diffZ;
+        lastZ = z;
+        /*
+        myfile << i << ", ";
+        myfile << z << ", ";
+        myfile << diffZ << "\n";
+        */
+        third = true;
+      } 
+      else if (third)
       {
-        biggestDoubleDiffZ = doubleDiffZ;
-        biggestDoubleDiffi = i;
+        third = false;
+        diffZ = z - lastZ;
+        doubleDiffZ = diffZ - lastDiffZ;
+        lastZ = z;
+        lastDiffZ = diffZ;
+        /*
+        myfile << i << ", ";
+        myfile << z << ", ";
+        myfile << diffZ << ", ";
+        myfile << doubleDiffZ << ", ";
+        */
+        minDoubleDiff1Z = doubleDiffZ; minDoubleDiff1i = i;
+        maxDoubleDiffZ = doubleDiffZ; maxDoubleDiffi = i;
+        minDoubleDiff2Z = doubleDiffZ; minDoubleDiff2i = i;
+        /*
+        myfile << minDoubleDiff1Z << ", " << minDoubleDiff1i << ", ";
+        myfile << maxDoubleDiffZ << ", " << maxDoubleDiffi << ", ";
+        myfile << minDoubleDiff2Z << ", " << minDoubleDiff2i << "\n";
+        */
       }
-
-      if (i < biggestDoubleDiffi) // on the near side
+      else
       {
-        if (doubleDiffZ < smallestDoubleDiff1Z)
+        /* code */
+        diffZ = z - lastZ;
+        doubleDiffZ = diffZ - lastDiffZ;
+        lastZ = z;
+        lastDiffZ = diffZ;
+
+        /*
+        myfile << i << ", ";
+        myfile << z << ", ";
+        myfile << diffZ << ", ";
+        myfile << doubleDiffZ << ", ";
+        */
+
+        if (i <= 30) // ignore the beginning.
         {
-          smallestDoubleDiff1Z = doubleDiffZ;
-          smallestDoubleDiff1i = i;
+          minDoubleDiff1Z = doubleDiffZ; minDoubleDiff1i = i;
+          maxDoubleDiffZ = doubleDiffZ; maxDoubleDiffi = i;
+          minDoubleDiff2Z = doubleDiffZ; minDoubleDiff2i = i;
         }
-      }
-
-      if (i > biggestDoubleDiffi) // on the far side
-      {
-        if (doubleDiffZ < smallestDoubleDiff2Z)
+        else
         {
-          smallestDoubleDiff2Z = doubleDiffZ;
-          smallestDoubleDiff2i = i;
+          /* code */
+          if (i < cloudSize/2) // on the left side of Max
+          {
+            if (doubleDiffZ < minDoubleDiff1Z)
+            {
+              minDoubleDiff1Z = doubleDiffZ;
+              minDoubleDiff1i = i;
+            }
+          }
+
+          if (doubleDiffZ > maxDoubleDiffZ)
+          {
+            maxDoubleDiffZ = doubleDiffZ;
+            maxDoubleDiffi = i;
+          }
+
+          if (i == maxDoubleDiffi)
+          {
+            minDoubleDiff2Z = doubleDiffZ;
+            minDoubleDiff2i = i;
+          }
+          else if ((i > maxDoubleDiffi) && (doubleDiffZ < minDoubleDiff2Z))
+          {
+            minDoubleDiff2Z = doubleDiffZ;
+            minDoubleDiff2i = i;
+          }
         }
+        
+        /*
+        myfile << minDoubleDiff1Z << ", " << minDoubleDiff1i << ", ";
+        myfile << maxDoubleDiffZ << ", " << maxDoubleDiffi << ", ";
+        myfile << minDoubleDiff2Z << ", " << minDoubleDiff2i << "\n";
+        */
       }
     }
-    lastZ = z;
-    lastDiffZ = diffZ;
-    lastDoubleDiffZ = doubleDiffZ;
   }
+  /*
+  ROS_INFO_STREAM("x1: " << minDoubleDiff1i << "\n");
+  ROS_INFO_STREAM("z1: " << pointcloud[minDoubleDiff1i].z * 1e3 << "\n");
 
-  // if (writeToFile) { writeToFile = false; };
+  ROS_INFO_STREAM("x2: " << minDoubleDiff2i << "\n");
+  ROS_INFO_STREAM("z2: " << pointcloud[minDoubleDiff2i].z * 1e3 << "\n");
 
-  ROS_INFO_STREAM("x1: " << smallestDoubleDiff1i * 10 << "\n");
-  ROS_INFO_STREAM("z1: " << pointcloud[smallestDoubleDiff1i].z * 1e3 << "\n");
-
-  ROS_INFO_STREAM("x2: " << smallestDoubleDiff2i * 10 << "\n");
-  ROS_INFO_STREAM("z2: " << pointcloud[smallestDoubleDiff2i].z * 1e3 << "\n");
-
-  ROS_INFO_STREAM("X step size: " << global_x_increment * 1e3 << "mm\n");
-  ROS_INFO_STREAM("The Highest Point: " << highest * 1e3 << "\n");
-  ROS_INFO_STREAM("The Lowest Point: " << lowest * 1e3 << "\n");
-
-  double z1 = pointcloud[smallestDoubleDiff1i].z;
-  double z2 = pointcloud[smallestDoubleDiff2i].z;
-  int base = smallestDoubleDiff2i - smallestDoubleDiff1i;
-  double gradient = (z2 - z1)/base;
+  ROS_INFO_STREAM("X step size: " << global_x_increment << "mm\n");
+  */
+  double z1 = pointcloud[minDoubleDiff1i].z * 1e3;
+  double z2 = pointcloud[minDoubleDiff2i].z * 1e3;
+  int base = minDoubleDiff2i - minDoubleDiff1i;
   double zT; // z at top
   double zB; // z at bottom
 
-  for (int i = smallestDoubleDiff1i; i < smallestDoubleDiff2i; ++i)
+  for (int i = minDoubleDiff1i; i < minDoubleDiff2i; ++i)
   {
-    zB = pointcloud[i].z;
-    zT = gradient * (i - smallestDoubleDiff1i);
+    zB = pointcloud[i].z * 1e3;
+    zT = (pointcloud[minDoubleDiff1i].z + (((i - minDoubleDiff1i)/base) * (z2 - z1))) * 1e3;
 
-    /*
-     * changed pointcloud[i] to lastZ so no need the following
-     * 
-    if ((z != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (z != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
-          && (z != std::numeric_limits<double>::infinity()))
-    {
-      height = highest - z;
-      oHeight = height;
-    }
-    else
-    {
-      height = oHeight;
-    }
-    */
-    
     height = zT - zB;
-    
-    if (i == biggestDoubleDiffi)
-    {
-      Height = height;
-    }
-
+    /*
+    ROS_INFO_STREAM("zB: " << zB << "mm\n");
+    ROS_INFO_STREAM("zT: " << zT << "mm\n");
+    ROS_INFO_STREAM("zT - zB: " << height * 1e3 << "mm\n");
+    */
     area += height * global_x_increment;
   }
 
-  ROS_INFO_STREAM("The Base is: " << base * 10 << "mm\n");
-  ROS_INFO_STREAM("The Height is" << Height * 1e3 << "mm\n");
-  ROS_INFO_STREAM("The cross section area: " << area * 1e6 <<"mm2\n");
+  Height = pointcloud[maxDoubleDiffi].z * 1e3;
+
+  ROS_INFO_STREAM("The Base is: " << base/10 << "mm\n");
+  ROS_INFO_STREAM("The Height is: " << Height << "mm\n");
+  ROS_INFO_STREAM("The cross section area: " << area <<"mm2\n");
 
   return area;
 }
