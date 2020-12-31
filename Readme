@@ -1,6 +1,14 @@
 
  roboweld
 
+ 31 December 2020.
+
+ Now, the Keyence Laser Scanner can scan the workpiece and workout the cross section area and
+ the volume of the groove from beginning to end.
+
+ It would be better if the goove can be filled with a different colour marker to show the area
+ and volume calculated.
+
  23 December 2020.
 
  Try to find out and display the height of the plane surface first.
