@@ -1,6 +1,45 @@
 
  roboweld
 
+ 18 January 2021.
+
+ Over the last 10 days, work is being done on the overcoming problems of the Gradient and the
+ Derivative of the Gradient. First found that the Gradient is not smooth and hence gives rise 
+ to spikes in the Derivative of the Grandient. Hence the Second Derivative of Z will not be 
+ accurate in finding the edges of the Groove. Then worked out averaging the Z, Derivative of Z,
+ and Double Derivative of Z will give better result with less or smaller spikes.
+
+ Then found that the average from 9 points to 15 points. A lot of time was spent on working out
+ the algorithm in finding the Gradient, and the Derivative of the Gradient by just going through
+ the data points of the profile Once. Making it correct must be very careful and time consuming
+ in debugging it.
+
+ 8 January 2021.
+
+ One of the biggeset problem now is the time taken to handle all the "cube" markers. It would be
+ good if marker array can be used. Sample codes are needed to learn how to do it for marker arrays.
+
+ Now the marker array seems to be working. However, the dot and double dot of z still seems to 
+ behave in strange ways at some points.
+
+ 7 January 2021.
+
+ Red colour markers are used to fill the groove.
+
+ Be careful, the queue size of the marker should be big enough. The groove is about 30mm wide 
+ and each point of the scanner is about 0.1 mm apart. Therefore, there will be about 300 points
+ for each scan line. It is necessary to make sure both the publisher and the RViz setting to have
+ about 350 to 400 queue size. Otherwise most of the markers will not appear.
+
+ Now, some of the scan lines are not 30 mm wide. It is necessary to output a file with all the
+ points and check how the dot (Derivative or the Gradient) and double dot (that is the Derivative
+ of the Gradient) behave.
+
+ It is found that some of the scan lines behave in a "strange" way in that the Maximum double dot
+ of Z has a very Minimum double dot just before it. This near Minium double dot makes the min 
+ found on the left side (before the Max) wrong. Now, I have made that to be about 10 points or 
+ 1 mm near it to be invalid (or discount it).
+
  31 December 2020.
 
  Now, the Keyence Laser Scanner can scan the workpiece and workout the cross section area and
