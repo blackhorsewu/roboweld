@@ -155,8 +155,8 @@ int main(int argc, char *argv[])
   y_filter_min = priv_nh_.param<float>("y_filter_min",  -0.25);
   y_filter_max = priv_nh_.param<float>("y_filter_max",  0.50);
 //  z_filter_min = priv_nh_.param<float>("z_filter_min",  0.00046);
-  z_filter_min = priv_nh_.param<float>("z_filter_min",  0.005);
-  z_filter_max = priv_nh_.param<float>("z_filter_max",  0.16785);
+  z_filter_min = priv_nh_.param<float>("z_filter_min",  0.007);
+  z_filter_max = priv_nh_.param<float>("z_filter_max",  0.023);
 //  z_filter_max = priv_nh_.param<float>("z_filter_max",  0.008);
 
   /*

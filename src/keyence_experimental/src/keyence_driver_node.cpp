@@ -285,9 +285,9 @@ int main(int argc, char** argv)
   Cloud::Ptr transformed_pc_msg(new Cloud);
 
   // setup point Marker message
-  visualization_msgs::Marker fillers;
-
-  fillers.header.frame_id = world_frame;
+  visualization_msgs::MarkerArray fillers;
+/*
+  fillers.header.frame_id = world_frame;  // *******************************************************************
   fillers.ns = "fillers";
   fillers.action = visualization_msgs::Marker::ADD;
   fillers.pose.orientation.w = 1.0; // Quarternion
@@ -296,11 +296,11 @@ int main(int argc, char** argv)
   fillers.scale.x = 0.0001; // so the line is shown as of 0.1mm wide
   fillers.color.r = 1;   // in red
   fillers.color.a = 1;   // 
-
+*/
   geometry_msgs::Point points;
 
   // set up fillers Marker publisher
-  ros::Publisher fillers_pub = nh.advertise<visualization_msgs::Marker>("fillers", 400);
+  ros::Publisher fillers_pub = nh.advertise<visualization_msgs::MarkerArray>("fillers", 400);
 
   pc_msg->header.frame_id = frame_id;
   pc_msg->is_dense = false; // cloud could have NaNs
@@ -316,6 +316,7 @@ int main(int argc, char** argv)
   bool active_flag = true;
   int line_no = 0;
   int file_no = 1;
+  int filler_id = 0;
   
   while (ros::ok())
   {
@@ -374,8 +375,6 @@ int main(int argc, char** argv)
       char out_text[100];
       Eigen::Isometry3d out_text_pose = Eigen::Isometry3d::Identity();
 
-      // int line_no = 0;
-
       // Main loop
       sleeper.reset();
       while (ros::ok())
@@ -426,7 +425,7 @@ int main(int argc, char** argv)
             listener.waitForTransform(world_frame,
                                       frame_id,
                                       ros::Time::now(),
-                                      ros::Duration(1.5)); // *********************************************//
+                                      ros::Duration(0.6)); // Frequency of scan ** It seems to be working fine when 1.0 //
 
             listener.lookupTransform (world_frame,
                                       frame_id,
@@ -450,6 +449,12 @@ int main(int argc, char** argv)
 
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
 
+          x = stransform.getOrigin().x();
+          y = stransform.getOrigin().y();
+          z = stransform.getOrigin().z();
+          
+
+
 /***********************************************************************************************
           cross_section_area = cross_section(*transformed_pc_msg_local, points);
 ************************************************************************************************/
@@ -462,6 +467,7 @@ int main(int argc, char** argv)
   double minDoubleDot2Z;
   double maxDoubleDotZ;
   double height, Height;
+  int valid_begin = 0;
   int minDoubleDot1i, minDoubleDot2i, maxDoubleDoti;
   int cloudSize = pointcloud.size();
   // bool writeToFile = false;
@@ -473,9 +479,152 @@ int main(int argc, char** argv)
   // Line list pose
   // geometry_msgs::Point p;
   
-  ROS_INFO_STREAM("The x step size: " << global_x_increment << "mm\n");
-
   using namespace std;
+  int w = 15;
+  int m = w / 2;
+  int j = 1;
+  int maxdavgdavgzj;
+  // int k = 0;
+  // double denominator = 1/w;
+  double sumz = 0.0;
+  double sumdavgz = 0.0;
+  double sumdavgdavgz = 0.0;
+  double Z[cloudSize], avgz[cloudSize], avgdavgz[cloudSize], avgddavgz[cloudSize];
+  double davgz[cloudSize], davgdavgz[cloudSize];
+  double maxdavgdavgz; // this can be and should be found here
+  string file_name;
+
+    ofstream myfile;
+    file_name = "profile_" + std::to_string(file_no) + ".csv";
+    myfile.open(file_name);
+    myfile << "J, Z, Average Z, D Avg Z, Avg D Avg Z, D Avg D Avg Z, Avg DD Avg Z\n";
+    /*
+     * Going through the scanned line data for the first time.
+     * Should be able to work out the Gradient and the Derivative of the Gradient, and also the
+     * Maximum value of the Derivative of the Gradient, that is the deepest point of the Groove.
+     */
+    for (int i = 0; i < (cloudSize - 50); ++i)
+    {
+      zz = pointcloud[i].z;
+      if ((zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
+            && (zz != std::numeric_limits<double>::infinity()))
+      {   // then this is a piece of normal data
+        if (first) { first = false; second = true; }
+        else if (second) { second = false; }
+        else
+        {
+          if (j < (w - m)) // from 1 to m
+          {                                                          //////////////// j = 1 to m /////
+            Z[j] = zz;
+            sumz += Z[j];                          // cumulate sumz from Z[1] to Z[m]
+            myfile << j << ", " << zz << ", \n";   // write only j and Z
+          }
+          else if ((j >= (w - m)) && (j < w))                         ///////////////// j = m+1 to w-1 ////
+          {
+            Z[j] = zz;    
+            sumz += Z[j];                          // carry on cumulate sumz but do NOT write them out
+          }
+          else if (j == w)                                            ////////////////// j = w //////
+          {
+            Z[j] = zz;
+            sumz += Z[j];                          // sumz cumulated from Z[1] to Z[w]
+            avgz[j-m] = sumz / w;                  // average and put into avgz[j-m]
+            myfile << (j-m) << ", " << Z[j-m] << ", " << avgz[j-m] << ", \n"; // WRITE Z[j-m] and avgz[j-m] to file
+            sumz -= Z[(j-w)+1];                    // sumz subtract Z[(j-w)+1], the first cumulated value
+          }
+          else if ((j > w) && (j <= (w+m)))                          //////////////////  j = w+1 to w+m //// 
+          {
+            Z[j] = zz;
+            sumz += Z[j];                          // cumulate sumz from Z[w+1] to Z[w+m]
+            avgz[j-m] = sumz / w;                  // average at j-m
+            davgz[j-m] = avgz[j-m] - avgz[(j-m)-1];// difference between averages of Z[j-m] and [(j-m)-1]
+            sumdavgz += davgz[j-m];                // cumulate the difference
+            myfile << (j-m) << ", " << Z[j-m] << ", " << avgz[j-m] << ", " << davgz[j-m] << ", \n";
+            sumz -= Z[(j-w)+1];                    // sumz subtract Z[(j-w)+1], the first cumulated value
+          } 
+          else if (j == ((w+m)+1))                                   /////////////////// j = (w+m)+1
+          {
+            Z[j] = zz;
+            sumz += Z[j];                          // sumz cumulated from Z[w+1] to Z[(w+m)+1]
+            avgz[j-m] = sumz / w;                  // average at j-m
+            davgz[j-m] = avgz[j-m] - avgz[(j-m)-1];// difference between averages of Z[j-m] and Z[(j-m)-1]
+            sumdavgz += davgz[j-m];                // cumulate the difference
+            sumz -= Z[(j-w)+1];                    // sumz subtract Z[(j-w)+1], the first cumulated value
+          }
+          else if ((j > ((w+m)+1)) && (j < (((w+m)+m)+1) ))          ///////////////// j = ((w+m)+1)+1 to (((w+m)+m)+1)
+          {
+            Z[j] = zz;
+            sumz += Z[j];                          // cumulate sumz from Z[((w+m)+1)+1] to Z[(w+m)+m]
+            avgz[j-m] = sumz/w;                    // average avgz[11] / j=17; avgz[13]
+            davgz[j-m] = avgz[j-m] - avgz[(j-m)-1];// difference between averages of Z[j-m] and Z[(j-m)-1]
+            sumdavgz += davgz[j-m];                // cumulate the difference
+            sumz -= Z[(j-w)+1];                    // sumz subtract Z[(j-w)+1], the first cumulated value
+          }
+          else if (j==(((w+m)+m)+1))                                  ////////////////// j = ((w+m)+m)+1
+          {
+            Z[j] = zz;
+            sumz += Z[j];                          // sum Z[10] to Z[18]
+            avgz[j-m] = sumz/w;                    // avgz[14] = sumz / 9
+            davgz[j-m] = avgz[j-m] - avgz[(j-m)-1];// davgz[14]=avgz[14]-avgz[13]
+            sumdavgz += davgz[j-m];                // sumdavgz += davgz[14] ; sumdavgz[6] to sumdavgz[14]
+            avgdavgz[(j-m)-m] = sumdavgz / w;      // avgdavgz[10]
+            myfile << ((j-m)-m) << ", " << Z[(j-m)-m] << ", " << avgz[(j-m)-m] << ", " << davgz[(j-m)-m] << ", "  << avgdavgz[(j-m)-m] << "\n";
+            sumdavgz -= davgz[((j-w)-m)+1];        //  Need to subtact davgz[6]; j=18, w=9, m=4; j-w-m+1 = 6
+            sumz -= Z[(j-w)+1];                    // subtract Z[10]
+          }
+          else if ((j>(((w+m)+m)+1)) && (j<(((((w+m)+m)+m)+1)+1)))
+          {
+            Z[j] = zz;
+            sumz += Z[j];
+            avgz[j-m] = sumz/w;
+            davgz[j-m] = avgz[j-m] - avgz[j-m-1];
+            sumdavgz += davgz[j-m];
+            avgdavgz[(j-m)-m] = sumdavgz / w;
+            davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
+            sumdavgdavgz += davgdavgz[(j-m)-m];
+            myfile << ((j-m)-m) << ", " << Z[(j-m)-m] << ", " << avgz[(j-m)-m] << ", " << davgz[(j-m)-m] << ", "  << avgdavgz[(j-m)-m] << 
+                  ", " << davgdavgz[(j-m)-m] << "\n ";
+            sumdavgz -= davgz[((j-w)-m)+1];
+            sumz -= Z[(j-w)+1];
+          }
+          else if ((j>=((((((w+m)+m)+m)+1)+1))) && (j < ((((((w+m)+m)+m)+m)+1)+1)))
+          {
+            Z[j] = zz;
+            sumz += Z[j];
+            avgz[j-m] = sumz/w;
+            davgz[j-m] = avgz[j-m] - avgz[j-m-1];
+            sumdavgz += davgz[j-m];
+            avgdavgz[(j-m)-m] = sumdavgz / w;
+            davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
+            sumdavgdavgz += davgdavgz[(j-m)-m];
+            sumdavgz -= davgz[((j-w)-m)+1];
+            sumz -= Z[(j-w)+1];
+          }
+          else if (j >= ((((((w+m)+m)+m)+m)+1)+1))
+          {
+            Z[j] = zz;
+            sumz += Z[j];
+            avgz[j-m] = sumz/w;
+            davgz[j-m] = avgz[j-m] - avgz[j-m-1];
+            sumdavgz += davgz[j-m];
+            avgdavgz[(j-m)-m] = sumdavgz / w;
+            davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
+            sumdavgdavgz += davgdavgz[(j-m)-m];
+            avgddavgz[((j-m)-m)-m] = sumdavgdavgz / w;
+            myfile << (((j-m)-m)-m) << ", " << Z[((j-m)-m)-m] << ", " << avgz[((j-m)-m)-m] << ", " << davgz[((j-m)-m)-m] << ", "  << avgdavgz[((j-m)-m)-m] << 
+                  ", " << davgdavgz[((j-m)-m)-m] << ", " << avgddavgz[((j-m)-m)-m] << "\n";
+            sumdavgdavgz -= davgdavgz[(((j-w)-m)-m)+1];
+            sumdavgz -= davgz[((j-w)-m)+1];
+            sumz -= Z[(j-w)+1];
+          }
+          j++;
+        }
+      }
+    }
+//    myfile.close();
+    file_no++;
+
+
 
   // Find the maximum double d first
   for (int i = 0; i < (cloudSize - 50); ++i)
@@ -487,6 +636,7 @@ int main(int argc, char** argv)
     {   // then this is a piece of normal data
       if (first) // from 1st onward
       {
+        valid_begin = i;
         first = false;
         lastZ = zz;
         second = true;
@@ -531,8 +681,17 @@ int main(int argc, char** argv)
       }
 
     }
+    else
+    {
+      if (valid_begin > 0)
+      {
+        pointcloud[i].z = lastZ;
+      }
+    }
+    
   }
 
+  ROS_INFO_STREAM("The x step size: " << global_x_increment * 1e3 << "mm; valid begin: " << valid_begin);
   ROS_INFO_STREAM("Finished finding the Max Double d: " << maxDoubleDotZ * 1e3 << " at position: " << maxDoubleDoti);
 
   // Next find the left and right Min double d 
@@ -595,24 +754,25 @@ int main(int argc, char** argv)
     }
   }
 
-  ROS_INFO_STREAM("Finished finding the Left Miin Double d: " << minDoubleDot1Z * 1e3 << " at position: " << minDoubleDot1i);
-  ROS_INFO_STREAM("Finished finding the Right Miin Double d: " << minDoubleDot2Z * 1e3 << " at position: " << minDoubleDot2i);
+  ROS_INFO_STREAM("Finished finding the Left Min Double d: " << minDoubleDot1Z * 1e3 << " at position: " << minDoubleDot1i);
+  ROS_INFO_STREAM("Finished finding the Right Min Double d: " << minDoubleDot2Z * 1e3 << " at position: " << minDoubleDot2i);
   
-  double z1 = pointcloud[minDoubleDot1i].z;
+  double z1 = pointcloud[minDoubleDot1i].z; // z1 and z2 are in Metre
   double z2 = pointcloud[minDoubleDot2i].z;
   double zT; // z at top
   double zB; // z at bottom
   double dh; // difference in height
   int begin, end, base;
-  string file_name;
+//  string file_name;
 
   begin = minDoubleDot1i;
   end = minDoubleDot2i;
   base = end - begin;
 
+  /* Write to file if needed. *
   if (base < 280) // a special case for debugging
   {
-    ROS_INFO("Base less than 28");
+    ROS_INFO("Base less than 28");*
     ofstream myfile;
     file_name = "profile_" + std::to_string(file_no) + ".csv";
     myfile.open(file_name);
@@ -623,11 +783,15 @@ int main(int argc, char** argv)
     myfile.close();
     file_no++;
   }
-
+  */
+  
+  // ROS_INFO("Here 1");
+  // fillers.markers.resize(base);
+  visualization_msgs::Marker filler_local;
   // After the three turning points are found, publish the fillers in this loop
   for (int i = begin; i <= end; ++i)
   {
-    zB = pointcloud[i].z; // Bottom
+    zB = pointcloud[i].z; // Bottom in Metre
     if (z2 > z1)
     {
       dh = z2 - z1;
@@ -636,42 +800,57 @@ int main(int argc, char** argv)
     {
       dh = z1 - z2;
     }
-    zT = (z1 + (((double)(i - begin)/base) * dh)); // Top
+    zT = (z1 + (((double)(i - begin)/base) * dh)); // Top in Metre
 
+    // ROS_INFO_STREAM("Here " << i+1 );
     if (zB > zT) // 
     {
-      height = zB - zT;
-
-      /*
-      ROS_INFO_STREAM("zB: " << pointcloud[i].z);
-      ROS_INFO_STREAM("i: " << i << " begin: " << begin << " (i - begin): " << (i - begin));
-      ROS_INFO_STREAM("base: " << base << " (i-begin)/base: " << (double)(i-begin)/base);
-      ROS_INFO_STREAM("z2: " << z2 << " z1: " << z1 << " dh: " << dh);
-      ROS_INFO_STREAM("[(i-begin)/base]*(z2-z1): " << ((double)(i-begin)/base)*(z2-z1));
-      ROS_INFO_STREAM("z1: " << z1 << " zT=z1 + ^: " << z1+((double)(i-begin)/base)*(z2-z1));
-      */
+      height = zB - zT; // height in Metre
     }
     else
     {
       height = zT - zB;
     }
-    area += height * global_x_increment;
+    area += height * global_x_increment; // both height and x_increment are in Metre, therefore area in Metre square
 
-    fillers.pose.position.x = pointcloud[i].x;
-    fillers.pose.position.y = pointcloud[i].y;
-    fillers.pose.position.z = zB + (height/2);
+    filler_local.id = filler_id++;
+    // ROS_INFO_STREAM("Going to fill up the marker message. marker id: " << filler_local.id);
 
-    fillers.scale.z = height;
+  filler_local.header.frame_id = world_frame;  // *******************************************************************
+  filler_local.ns = "fillers";
+  filler_local.action = visualization_msgs::Marker::ADD;
+  filler_local.pose.orientation.w = 1.0; // Quarternion
+  // filler_local.id = 0;
+  filler_local.type = visualization_msgs::Marker::CUBE;
+  filler_local.scale.x = 0.0001; // so the line is shown as of 0.1mm wide
+  filler_local.color.r = 1;   // in red
+  filler_local.color.a = 1;   // 
+
+    // This is only the location of the centre
+    filler_local.pose.position.x = pointcloud[i].x;
+    filler_local.pose.position.y = pointcloud[i].y;
+    filler_local.pose.position.z = zB + (height/2);
+    // Since the scanner is now tilted, it is still need to work out the orientation of the rectangular colume
+    // The 
+    filler_local.pose.orientation.x = stransform.getRotation().x();
+    filler_local.pose.orientation.y = stransform.getRotation().y();
+    filler_local.pose.orientation.z = stransform.getRotation().z();
+    filler_local.pose.orientation.w = stransform.getRotation().w();
+          
+
+
+    filler_local.scale.y = thickness;
+    filler_local.scale.z = height;
     // fillers.points.push_back(p);
     
-    if (fillers.scale.x == 0.0)
+    if (filler_local.scale.x == 0.0)
     {
-      ROS_INFO_STREAM("Fillers.scale.x was 0.0 and Line: " << line_no);
+      ROS_INFO_STREAM("Fillers.scale.x was 0.0 and Line: " << filler_local.id);
     } 
-    else if (fillers.scale.y == 0.0)
+    else if (filler_local.scale.y == 0.0)
     {
-      ROS_INFO_STREAM("Fillers.scale.y was 0.0 and Line: "<< line_no);
-    } else if (fillers.scale.z == 0.0)
+      ROS_INFO_STREAM("Fillers.scale.y was 0.0 and Line: "<< filler_local.id);
+    } else if (filler_local.scale.z == 0.0)
     {
       ROS_INFO_STREAM("Fillers.scale.z was 0.0 and Line: " << line_no);
       // cout << "Something is wrong!\n";
@@ -680,12 +859,15 @@ int main(int argc, char** argv)
     }
     else
     {
-      fillers_pub.publish(fillers);
-      fillers.id++;
+      filler_local.id++;
+      fillers.markers.push_back(filler_local);
     }
 
 
   }
+
+      fillers_pub.publish(fillers);
+  
 
   Height = pointcloud[maxDoubleDoti].z;
 
@@ -693,9 +875,9 @@ int main(int argc, char** argv)
   // ROS_INFO_STREAM("The Height is: " << Height * 1e3 << "mm\n");
   ROS_INFO_STREAM("The cross section area: " << area <<"mm2\n");
 
-          x = stransform.getOrigin().x();
-          y = stransform.getOrigin().y();
-          z = stransform.getOrigin().z();
+          // x = stransform.getOrigin().x();
+          // y = stransform.getOrigin().y();
+          // z = stransform.getOrigin().z();
           
           if (first_line)
           { 
@@ -706,7 +888,7 @@ int main(int argc, char** argv)
           { // Not first line
             ROS_INFO_STREAM("y: " << y * 1e3 << "mm; lastY: " << lastY * 1e3 << "mm\n");
 
-            thickness = (y - lastY);
+            thickness = (y - lastY); // Row thickness is in Metre
             ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << "mm\n");
 
             volume += area * thickness;
@@ -716,7 +898,7 @@ int main(int argc, char** argv)
 
           lastY = y;
 
-          fillers.scale.y = thickness; // so the line is shown as of 0.1mm wide
+          // fillers.markers[i].scale.y = thickness; // so the line is shown as of 0.1mm wide
 
 
           // fillers.points = points;
@@ -726,9 +908,9 @@ int main(int argc, char** argv)
 
           int n = sprintf(out_text, 
                       "Cross Section Area: %5.2f mm2\nThickness of slice: %5.2f mm\nVolume of Groove: %5.2f mm3\n",
-                      area,
-                      thickness,
-                      volume
+                      area * 1e6,
+                      thickness * 1e3,
+                      volume * 1e9
                      );
 
           out_text_pose.translation().x() = x + 0.15;
@@ -741,10 +923,11 @@ int main(int argc, char** argv)
                                    rvt::LARGE,
                                    1
                                   );
-          visual_tools.trigger();
+          visual_tools.trigger();  /************ Switching the display ON and OFF here. *****************/
 
           // publish pointcloud
           pub.publish(transformed_pc_msg);
+          line_no++;
         }
       } // end main loop
     }
@@ -754,9 +937,7 @@ int main(int argc, char** argv)
       ROS_ERROR_STREAM("Attempting reconnection after pause");
       ros::Duration(1.0).sleep();
     }
-    line_no++;
   }
-  line_no++;
   return 0;
 }
 
@@ -773,7 +954,7 @@ int unpackProfileToPointCloud(const keyence::ProfileInformation& info,
 
   msg.points.reserve(info.num_profiles);
 
-  global_x_increment = keyence::unitsToMeters(info.x_increment) * 1e3;
+  global_x_increment = keyence::unitsToMeters(info.x_increment); // Raw x increment in Metre
 
   // add points
   for (int i = 0; i < static_cast<int>(points.size()); ++i)

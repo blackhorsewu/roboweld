@@ -96,13 +96,25 @@
     </collision>
   </link>
 
+<!--
   <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
     <origin xyz="0.062 -0.105 0.1599" rpy="0 ${pi} ${-pi/2.0}"/>
     <parent link="wrist_3_link"/>
     <child link="lj_v7200_frame"/>
   </joint>
+-->
+  <!-- The Keyence Laser Scanner rowed (tilted around the X axis) by 27 degree -->
+  <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
+  
+    <origin xyz="0.11692 -0.105 0.173" rpy="-0.471233898038469 ${pi} ${-pi/2.0}"/>
+  <!--
+    <origin xyz="0.11692 -0.105 0.18224" rpy="-0.5115527743863 ${pi} ${-pi/2.0}"/>
+  -->  
+    <parent link="wrist_3_link"/>
+    <child link="lj_v7200_frame"/>
+  </joint>
 
-  <!-- Optical frame -->
+  <!-- The Laser Scanner Optical frame -->
   <link name="lj_v7200_optical_frame"/>
   <joint name="optical_frame_joint" type="fixed">
     <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
@@ -110,12 +122,12 @@
     <child link="lj_v7200_optical_frame"/>
   </joint>
 
-
-    <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
-      <origin xyz="0 -0.105 0.360" rpy="0 0 ${pi}"/>
-      <parent link="wrist_3_link"/>
-      <child link="tool0"/>
-    </joint>
+  <!-- The pose of the Welding Torch (Tool0) with respect to Wrist-3-link is defined here. -->
+  <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
+    <origin xyz="0 -0.105 0.360" rpy="0 0 ${pi}"/>
+    <parent link="wrist_3_link"/>
+    <child link="tool0"/>
+  </joint>
 
   <!-- This is the link for the tail cable of the torch -->
   <link name="tail" >
