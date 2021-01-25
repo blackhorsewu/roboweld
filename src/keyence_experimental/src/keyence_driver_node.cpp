@@ -312,9 +312,14 @@ int main(int argc, char** argv)
   std::string sensor_port;
   double sample_rate;
 
-  double x, y, lastY, z;
+  double x, y, z;
+  double first_y = 0.0;
+  double lastY = 0.0;
+  double TopZ = 0.0;
+  double BotZ = 0.0;
   double thickness = 0.0;
   double volume = 0.0;
+  double scanned_length = 0.0;
 
   // check required parameters
   if (!pnh.hasParam("controller_ip"))
@@ -368,12 +373,16 @@ int main(int argc, char** argv)
   // set up profile cloud publisher
   ros::Publisher pub = nh.advertise<Cloud>("profiles", 100);
 
+  bool write_vol_file = true; // write the whole scan brief data to a file
   bool active_flag = true;
   int line_no = 0;
   int file_no = 1;
   int filler_id = 0;
   int marker_id = 1;
   
+  string file_name;
+  ofstream myfile;
+
   while (ros::ok())
   {
     try
@@ -428,8 +437,15 @@ int main(int argc, char** argv)
 
       // Set Marker Lifetime
       // visual_tools.setLifetime(0.05);
-      char out_text[100];
+      char out_text[1500];
       Eigen::Isometry3d out_text_pose = Eigen::Isometry3d::Identity();
+
+      if (write_vol_file)
+      {
+        file_name = "volume.csv";
+        myfile.open(file_name);
+        myfile << "Width, Slice , Area, Plate , 1st Y, Y, Scanned Length, Volume\n";
+      }
 
       // Main loop
       sleeper.reset();
@@ -501,15 +517,11 @@ int main(int argc, char** argv)
                                        cloud_in,
                                        transformed_cloud);
 
-          // y = transformed_cloud.points[0].y;
-
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
 
           x = stransform.getOrigin().x();
           y = stransform.getOrigin().y();
           z = stransform.getOrigin().z();
-          
-
 
 /***********************************************************************************************
           cross_section_area = cross_section(*transformed_pc_msg_local, points);
@@ -526,8 +538,7 @@ int main(int argc, char** argv)
           bool first = true;
           bool second = false;
           bool third = false;
-          bool write_to_file = false;
-
+          bool write_to_file = false; // write data of each scan line to a file
 
           // Line list pose
           // geometry_msgs::Point p;
@@ -542,8 +553,6 @@ int main(int argc, char** argv)
           double sumdavgdavgz = 0.0;
           double Z[cloudSize], avgz[cloudSize], avgdavgz[cloudSize], avgddavgz[cloudSize];
           double davgz[cloudSize], davgdavgz[cloudSize];
-          string file_name;
-          ofstream myfile;
 
           if (write_to_file)
           {
@@ -553,7 +562,7 @@ int main(int argc, char** argv)
           }
 
 /********************************************************************************************
- * Going through the scanned line data for the first time.                                  *
+ * Going through the scanned line data for the FIRST time.                                  *
  * Should be able to work out the Gradient and the Derivative of the Gradient, and also the *
  * Maximum value of the Derivative of the Gradient, that is the deepest point of the Groove.*
  ********************************************************************************************/
@@ -568,7 +577,11 @@ int main(int argc, char** argv)
                   && (zz != std::numeric_limits<double>::infinity()))
             {   // then this is a piece of normal data
               if (first) { first = false; second = true; }
-              else if (second) { second = false; valid_begin = i+1; }
+              else if (second) 
+              { 
+                second = false;
+                valid_begin = i+1;
+              }
               else
               {
                 if (j < (w - m)) // from 1 to m
@@ -708,7 +721,8 @@ int main(int argc, char** argv)
             file_no++;
           }
 
-  ROS_INFO_STREAM("The x step size: " << global_x_increment * 1e3 << "mm; valid begin: " << valid_begin);
+  ROS_INFO_STREAM("X step: " << global_x_increment * 1e3 << " mm");
+  ROS_INFO_STREAM("Valid at: " << valid_begin << "; 1st y: " << first_y * 1e3);
   ROS_INFO_STREAM("Max DD position: " << maxDoubleDotj << " Line no.: " << line_no);
 
 /******************************************************************************************** 
@@ -748,7 +762,6 @@ int main(int argc, char** argv)
                   minDoubleDot2i = i;
                 }
               }
-
             }
           } // End of Second Loop through the Scan Line
 
@@ -779,12 +792,23 @@ int main(int argc, char** argv)
 
           base = length(a, b);
 
-          // fillers.markers.resize(end - begin);
+          Bot.x = pointcloud[maxDoubleDotj + valid_begin].x;
+          Bot.y = pointcloud[maxDoubleDotj + valid_begin].y;
+          Bot.z = pointcloud[maxDoubleDotj + valid_begin].z;
+
+          y = Bot.y; // This is the y on the bottom of the steel plate Groove
+          BotZ = Bot.z;
+          TopZ = proj(a, b, Bot).z;
+          if (first_y == 0.0)
+          {
+            first_y = y;
+          }
 
           // y is known before entering into the Loop Unless this is the first line
           if (line_no != 0)
           {
-            thickness = (y - lastY); // Row thickness is in Metre
+            thickness = (y - lastY) * cos(0.471233898038469); // Slice thickness is in Metre; it has slanted by 0.47 radian
+            scanned_length += thickness;
           }
 
           for (int i = begin; i <= end; ++i)
@@ -843,19 +867,29 @@ int main(int argc, char** argv)
             }
           } // End of Third Loop through the Scan Line
 
-          lastY = y;
-
           *transformed_pc_msg += *transformed_pc_msg_local;
 
+          area = area * cos(0.471233898038469);
           volume += area * thickness;
-          ROS_INFO_STREAM("Thickness: " << thickness * 1e3 << " mm");
+          ROS_INFO_STREAM("Width: " << base * 1e3 << " mm");
+          ROS_INFO_STREAM("Slice Thickness: " << thickness * 1e3 << " mm");
+          ROS_INFO_STREAM("Scanned Length: " << scanned_length * 1e3 << " mm");
+          ROS_INFO_STREAM("Y: " << y * 1e3);
+          ROS_INFO_STREAM("TopZ: " << TopZ*1e3 << " BotZ: " << BotZ*1e3 << " Plate: " << (TopZ - BotZ) * 1e3);
           ROS_INFO_STREAM("Area: " << area * 1e6 << " mm2");
           ROS_INFO_STREAM("Volume: " << volume * 1e9 << " mm3\n");
 
+          if (write_vol_file)
+          {
+            myfile << base * 1e3 << ", " << thickness * 1e3 << ", " << area * 1e6 << ", " << (TopZ-BotZ) * 1e3 << ", " << first_y * 1e3 << ", " 
+                   << y * 1e3 << ", " << scanned_length * 1e3 << ", " << volume * 1e9 << "\n";
+          }
+
           int n = sprintf(out_text, 
-                      "Cross Section Area: %5.2f mm2\nThickness of slice: %5.2f mm\nVolume of Groove: %5.2f mm3\n",
+                      "Cross Section Area: %5.2f mm2\nThickness of slice: %5.2f mm\nScanned length: %5.2f mm\nVolume of Groove: %5.2f mm3\n",
                       area * 1e6,
                       thickness * 1e3,
+                      scanned_length * 1e3,
                       volume * 1e9
                      );
 
@@ -874,9 +908,16 @@ int main(int argc, char** argv)
           // publish pointcloud
           pub.publish(transformed_pc_msg);
           line_no++;
-        }
+          lastY = y;
+        } // finish scanning a good line
         fillers_pub.publish(fillers);
       } // end main loop
+
+      if (write_vol_file)
+      {
+        myfile.close();
+      }
+
     }
     catch (const keyence::KeyenceException& ex)
     {

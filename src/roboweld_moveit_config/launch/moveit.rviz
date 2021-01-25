@@ -11,7 +11,6 @@ Panels:
         - /MarkerArray1/Namespaces1
         - /TF1/Frames1
         - /MarkerArray2
-        - /MarkerArray2/Status1
       Splitter Ratio: 0.3564593195915222
     Tree Height: 973
   - Class: rviz/Help
@@ -386,7 +385,7 @@ Visualization Manager:
       Marker Topic: /rviz_visual_tools
       Name: MarkerArray
       Namespaces:
-        {}
+        Text: true
       Queue Size: 100
       Value: true
     - Class: rviz/Camera
@@ -400,7 +399,6 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
-        "": true
         Grid: true
         MarkerArray: true
         MotionPlanning: true
@@ -536,25 +534,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.102466583251953
+      Distance: 0.8181951642036438
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5736426115036011
-        Y: -0.03378761187195778
-        Z: 2.362886334594805e-6
+        X: 0.4366984963417053
+        Y: -0.008240381255745888
+        Z: 2.1542700778809376e-6
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2897971272468567
+      Pitch: 0.4147973656654358
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 0.006850128062069416
+      Yaw: 0.0018362998962402344
     Saved: ~
 Window Geometry:
   Camera:
