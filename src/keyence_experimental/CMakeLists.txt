@@ -63,16 +63,30 @@ include_directories(
 )
 
 add_executable(
-  keyence_driver_node
-  src/keyence_driver_node.cpp
+  concave_scanner
+  src/concave_scanner.cpp
 )
 add_dependencies(
-  keyence_driver_node
+  concave_scanner
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_executable(
+  convex_scanner
+  src/convex_scanner.cpp
+)
+add_dependencies(
+  convex_scanner
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 target_link_libraries(
-  keyence_driver_node
+  concave_scanner
+  keyence_impl
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(
+  convex_scanner
   keyence_impl
   ${catkin_LIBRARIES}
 )
@@ -86,7 +100,15 @@ add_subdirectory(keyence_library)
 ## Mark executables and/or libraries for installation
 install(
   TARGETS
-  keyence_driver_node
+  concave_scanner
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
+
+install(
+  TARGETS
+  convex_scanner
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
