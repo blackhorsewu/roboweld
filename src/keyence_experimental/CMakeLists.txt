@@ -63,6 +63,15 @@ include_directories(
 )
 
 add_executable(
+  after_1st_scanner
+  src/after_1st_scanner.cpp
+)
+add_dependencies(
+  after_1st_scanner
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_executable(
   concave_scanner
   src/concave_scanner.cpp
 )
@@ -79,6 +88,11 @@ add_dependencies(
   convex_scanner
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(
+  after_1st_scanner
+  keyence_impl
+  ${catkin_LIBRARIES}
 )
 target_link_libraries(
   concave_scanner
@@ -98,6 +112,14 @@ add_subdirectory(keyence_library)
 #############
 
 ## Mark executables and/or libraries for installation
+install(
+  TARGETS
+  after_1st_scanner
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
+
 install(
   TARGETS
   concave_scanner
