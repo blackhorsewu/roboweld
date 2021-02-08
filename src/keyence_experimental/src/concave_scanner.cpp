@@ -33,8 +33,8 @@
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
 #include <string>
-#include <iostream>
-#include <fstream>
+// #include <iostream>
+// #include <fstream>
 
 #include <ctime>
 
@@ -375,8 +375,8 @@ int main(int argc, char** argv)
   // set up profile cloud publisher
   ros::Publisher pub = nh.advertise<Cloud>("profiles", 100);
 
-  bool write_Y_file = true; // write the whole scan brief data to a file
-  bool active_flag = true;
+  bool write_Y_file = false; // write the whole scan brief data to a file
+  bool active_flag = false;
   int line_no = 0;
   int file_no = 0;
   int filler_id = 0;
@@ -384,10 +384,11 @@ int main(int argc, char** argv)
   
   string file_name;
   ofstream Yfile;
+/*
   time_t now = time(0);
   tm *ltm = localtime(&now);
   char name_text[1200];
-
+*/
   while (ros::ok())
   {
     try
@@ -447,49 +448,8 @@ int main(int argc, char** argv)
 
       if (write_Y_file)
       {
-        int n = sprintf( name_text, "/home/victor/roboweld/Data/Volume/2021/February/%d-%d-%d-volume.csv",
-                          // 1900 + ltm->tm_year,
-                          // 1 + ltm->tm_mon,
-                          ltm->tm_mday,
-                          ltm->tm_hour,
-                          ltm->tm_min
-                       );
-        /*
-        int n = sprintf(name_text, "/home/victor/roboweld/Data/%d/%d/%d/%d-%d/volume.csv",
-                                   1900 + ltm->tm_year,
-                                   1 + ltm->tm_mon,
-                                   ltm->tm_mday,
-                                   5 + ltm->tm_hour,
-                                   30 + ltm->tm_min
-                                   ); */
-        // file_name = ;
-        // file_name += 
-        // file_name += "";
-        // Yfile.open(file_name);
-
-
-        std::ios_base::iostate exceptionMask = Yfile.exceptions() | std::ios::failbit;
-        Yfile.exceptions(exceptionMask);
-        try
-        {
-          Yfile.open(name_text);
-          cout << name_text << "\n";
-        }
-        catch (std::ios_base::failure& e)
-        {
-          std::cerr << e.what() << '\n';
-          cout << "fail to open file: " << name_text;
-        }
-        /*
-        if (Yfile.is_open())
-        {
-          cout << name_text << "\n";
-        }
-        else
-        {
-          cout << "fail to open file: " << name_text;
-        }
-        */
+        file_name = "/home/victor/Data/Volume/2021/February/volume.csv";
+        Yfile.open(file_name);
         Yfile << "Width, Slice , Area, Plate , 1st Y, Y, Scanned Length, Volume\n";
       }
 
@@ -603,17 +563,8 @@ int main(int argc, char** argv)
 
           if (write_X_file)
           {
-            int n = sprintf(name_text, "/home/victor/roboweld/Data/Profile/2021/February/%d-%d-%d-profile_%d.csv",
-                             // 1900 + ltm->tm_year,
-                             // 1 + ltm->tm_mon,
-                             ltm->tm_mday,
-                             ltm->tm_hour,
-                             ltm->tm_min,
-                             file_no
-                           );
-            // file_name = "profile_" + std::to_string(file_no) + ".csv";
-            Xfile.open(name_text);
-            cout << name_text << "\n";
+            file_name = "/home/victor/Data/profile/2021/February/profile_" + std::to_string(file_no) + ".csv";
+            Xfile.open(file_name);
             Xfile << "J, Z, Average Z, D Avg Z, Avg D Avg Z, D Avg D Avg Z, Avg DD Avg Z\n";
           }
 

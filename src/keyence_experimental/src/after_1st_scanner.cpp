@@ -382,11 +382,9 @@ int main(int argc, char** argv)
   int filler_id = 0;
   int marker_id = 1;
   
-  string file_name;
   ofstream Yfile;
   time_t now = time(0);
   tm *ltm = localtime(&now);
-  char name_text[1200];
 
   while (ros::ok())
   {
@@ -447,50 +445,81 @@ int main(int argc, char** argv)
 
       if (write_Y_file)
       {
-        int n = sprintf( name_text, "/home/victor/roboweld/Data/Volume/2021/February/%d-%d-%d-volume.csv",
-                          // 1900 + ltm->tm_year,
-                          // 1 + ltm->tm_mon,
-                          ltm->tm_mday,
-                          ltm->tm_hour,
-                          ltm->tm_min
-                       );
-        /*
-        int n = sprintf(name_text, "/home/victor/roboweld/Data/%d/%d/%d/%d-%d/volume.csv",
-                                   1900 + ltm->tm_year,
-                                   1 + ltm->tm_mon,
-                                   ltm->tm_mday,
-                                   5 + ltm->tm_hour,
-                                   30 + ltm->tm_min
-                                   ); */
-        // file_name = ;
-        // file_name += 
-        // file_name += "";
-        // Yfile.open(file_name);
-
-
-        std::ios_base::iostate exceptionMask = Yfile.exceptions() | std::ios::failbit;
-        Yfile.exceptions(exceptionMask);
-        try
+        char name_text[1200];
+        char mon_text[10];
+        char day_text[10];
+        char hour_text[10];
+        char min_text[10];
+        int n;
+        switch (ltm->tm_mon)
         {
-          Yfile.open(name_text);
-          cout << name_text << "\n";
+          case 0:
+            n = sprintf(mon_text, "Jan/");
+            break;
+          case 1:
+            n = sprintf(mon_text, "Feb/");
+            break;
+          case 2:
+            n = sprintf(mon_text, "Mar/");
+            break;
+          case 3:
+            n = sprintf(mon_text, "Apr/");
+            break;
+          case 4:
+            n = sprintf(mon_text, "May/");
+            break;
+          case 5:
+            n = sprintf(mon_text, "Jun/");
+            break;
+          case 6:
+            n = sprintf(mon_text, "Jul/");
+            break;
+          case 7:
+            n = sprintf(mon_text, "Aug/");
+            break;
+          case 8:
+            n = sprintf(mon_text, "Sep/");
+            break;
+          case 9:
+            n = sprintf(mon_text, "Oct/");
+            break;
+          case 10:
+            n = sprintf(mon_text, "Nov/");
+            break;
+          case 11:
+            n = sprintf(mon_text, "Dec/");
+            break;
         }
-        catch (std::ios_base::failure& e)
+        n = sprintf(name_text, "/home/victor/Data/Volume/%d/",
+                               1900 + ltm->tm_year
+                   );
+        if (!mkdir(name_text, 0777))
+        { // folder Volume already exists
+          ROS_INFO_STREAM("Folder " << 1900 + ltm->tm_year << " for Volume was created.");
+        }
+        strcat(name_text, mon_text);
+        if (!mkdir(name_text, 0777))
         {
-          std::cerr << e.what() << '\n';
-          cout << "fail to open file: " << name_text;
+          ROS_INFO_STREAM("Folder " << mon_text << " for Volume was created.");
         }
-        /*
-        if (Yfile.is_open())
+        n = sprintf(day_text,"%d/", ltm->tm_mday);
+        n = sprintf(hour_text, "%d/", ltm->tm_hour);
+        n = sprintf(min_text, "%d-volume.csv", ltm->tm_min);
+        strcat(name_text, day_text);
+        if (!mkdir(name_text, 0777))
         {
-          cout << name_text << "\n";
+          ROS_INFO_STREAM("Folder " << day_text << " for Volume was created.");
         }
-        else
+        strcat(name_text, hour_text);
+        if (!mkdir(name_text, 0777))
         {
-          cout << "fail to open file: " << name_text;
+          ROS_INFO_STREAM("Folder " << hour_text << " for Volume was created.");
         }
-        */
+        strcat(name_text, min_text);
+        Yfile.open(name_text);
+        cout << name_text << "\n";
         Yfile << "Width, Slice , Area, Plate , 1st Y, Y, Scanned Length, Volume\n";
+
       }
 
       // Main loop
@@ -579,7 +608,7 @@ int main(int argc, char** argv)
           double doubleDotZ; // lastDoubleDiffZ;
           double height, Height;
           int valid_begin = 0;
-          int minDoubleDot1i, minDoubleDot2i; // maxDoubleDoti;
+          int minDoubleDot1i, minDoubleDot2i;
           int cloudSize = pointcloud.size();
           bool first = true;
           bool second = false;
@@ -594,7 +623,8 @@ int main(int argc, char** argv)
           int w = 15;     // Number of points to take Average 
           int m = w / 2;  // Half of no. of average points
           int j = 1;
-          int maxDoubleDotj;
+          int maxDoubleDot1j;
+          int maxDoubleDot2j;
           double sumz = 0.0;
           double sumdavgz = 0.0;
           double sumdavgdavgz = 0.0;
@@ -603,28 +633,100 @@ int main(int argc, char** argv)
 
           if (write_X_file)
           {
-            int n = sprintf(name_text, "/home/victor/roboweld/Data/Profile/2021/February/%d-%d-%d-profile_%d.csv",
-                             // 1900 + ltm->tm_year,
-                             // 1 + ltm->tm_mon,
-                             ltm->tm_mday,
-                             ltm->tm_hour,
-                             ltm->tm_min,
-                             file_no
-                           );
-            // file_name = "profile_" + std::to_string(file_no) + ".csv";
+            /* Before openning a file, check if the folders are there. If not, create them first
+             * First, Check the YEAR folder, then check the MONTH folder, then the DAY folder, 
+             * the HOUR folder, then the MINUTE folder. They have to be put into separate folders
+             * because for every run, it will generate, at least, more than hundread folders.
+            */
+            char name_text[1200];
+            char mon_text[100];
+            char day_text[100];
+            char hour_text[100];
+            char min_text[100];
+            int n;
+            switch (ltm->tm_mon)
+            {
+              case 0:
+                n = sprintf(mon_text, "Jan/");
+                break;
+              case 1:
+                n = sprintf(mon_text, "Feb/");
+                break;
+              case 2:
+                n = sprintf(mon_text, "Mar/");
+                break;
+              case 3:
+                n = sprintf(mon_text, "Apr/");
+                break;
+              case 4:
+                n = sprintf(mon_text, "May/");
+                break;
+              case 5:
+                n = sprintf(mon_text, "Jun/");
+                break;
+              case 6:
+                n = sprintf(mon_text, "Jul/");
+                break;
+              case 7:
+                n = sprintf(mon_text, "Aug/");
+                break;
+              case 8:
+                n = sprintf(mon_text, "Sep/");
+                break;
+              case 9:
+                n = sprintf(mon_text, "Oct/");
+                break;
+              case 10:
+                n = sprintf(mon_text, "Nov/");
+                break;
+              case 11:
+                n = sprintf(mon_text, "Dec/");
+                break;
+            }
+            n = sprintf(name_text, "/home/victor/Data/Profile/%d/", 1900 + ltm->tm_year);
+            if (!mkdir(name_text, 0777))
+            { // folder Volume already exists
+              ROS_INFO_STREAM("Folder " << 1900 + ltm->tm_year << " created.");
+            }
+            strcat(name_text, mon_text);
+            if (!mkdir(name_text, 0777))
+            {
+              ROS_INFO_STREAM("Folder " << mon_text << " created.");
+            }
+            n = sprintf(day_text,"%d/", ltm->tm_mday);
+            n = sprintf(hour_text, "%d/", ltm->tm_hour);
+            n = sprintf(min_text, "%d-profile_%d.csv", ltm->tm_min, file_no);
+
+            strcat(name_text, day_text);
+            if (!mkdir(name_text, 0777))
+            {
+              ROS_INFO_STREAM("Folder " << day_text << " created.");
+            }
+            strcat(name_text, hour_text);
+            if (!mkdir(name_text, 0777))
+            {
+              ROS_INFO_STREAM("Folder " << hour_text << " created.");
+            }
+            strcat(name_text, min_text);
             Xfile.open(name_text);
             cout << name_text << "\n";
             Xfile << "J, Z, Average Z, D Avg Z, Avg D Avg Z, D Avg D Avg Z, Avg DD Avg Z\n";
           }
 
-/********************************************************************************************
- * Going through the scanned line data for the FIRST time.                                  *
- * Should be able to work out the Gradient and the Derivative of the Gradient, and also the *
- * Maximum value of the Derivative of the Gradient, that is the deepest point of the Groove.*
- ********************************************************************************************/
+/*********************************************************************************************
+ * Going through the scanned line data for the FIRST time.                                   *
+ * Should be able to work out the Gradient and the Derivative of the Gradient.               *
+ * This node is to scan a groove already has gone through a first pass of welding. The shape *
+ * of the groove has changed and we cannot find a Maximum of the Derivative of the Gradient  *
+ * as the centre of the groove any more. However, one can assume the lowest point of Z as    *
+ * centre of the groove. Then we can divide the scan into left and right parts along the     *
+ * middle. Then find the Maximum and Minimum on both sides.                                  *
+ *********************************************************************************************/
           double minDoubleDot1Z = 0.0;
           double minDoubleDot2Z = 0.0;
-          double maxDoubleDotZ = 0.0;
+          double maxDoubleDot1Z = 0.0;
+          double minZ = 1.0;
+          int minZj = 0;
 
           for (int i = 0; i < (cloudSize - 50); ++i)
           {
@@ -640,6 +742,12 @@ int main(int argc, char** argv)
               }
               else
               {
+                if (zz < minZ)
+                {
+                  minZ = zz;
+                  minZj = j;
+                }
+
                 if (j < (w - m)) // from 1 to m
                 {                                                          //////////////// j = 1 to m /////
                   Z[j] = zz;
@@ -753,11 +861,22 @@ int main(int argc, char** argv)
                   davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
                   sumdavgdavgz += davgdavgz[(j-m)-m];
                   avgddavgz[((j-m)-m)-m] = sumdavgdavgz / w;
+/*
+                  if ((((j-m)-m)-m) < (cloudSize/2))
+                  {
+                    if (avgddavgz[((j-m)-m)-m] > maxDoubleDot1Z)
+                    {
+                      maxDoubleDot1Z = avgddavgz[((j-m)-m)-m];
+                      maxDoubleDot1j = ((j-m)-m)-m;
+                    }
+                  }
+
                   if (avgddavgz[((j-m)-m)-m] > maxDoubleDotZ)
                   {
                     maxDoubleDotZ = avgddavgz[((j-m)-m)-m];
                     maxDoubleDotj = ((j-m)-m)-m;
                   }
+*/
                   if (write_X_file)
                   {
                     Xfile << (((j-m)-m)-m) << ", " << Z[((j-m)-m)-m] << ", " << avgz[((j-m)-m)-m] << ", " << davgz[((j-m)-m)-m] << ", "  << avgdavgz[((j-m)-m)-m] << 
@@ -779,7 +898,8 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("X step: " << global_x_increment * 1e3 << " mm");
   ROS_INFO_STREAM("Valid at: " << valid_begin << "; 1st y: " << first_y * 1e3);
-  ROS_INFO_STREAM("Max DD position: " << maxDoubleDotj << " Line no.: " << line_no);
+  ROS_INFO_STREAM("Min Z: " << minZ << "; Min Z j: " << minZj);
+  ROS_INFO_STREAM("Max DD position: " << maxDoubleDot1j << " Line no.: " << line_no);
 
 /******************************************************************************************** 
  * Go through the data points the SECOND time. Next find the LEFT and RIGHT Min double d    *
@@ -807,12 +927,12 @@ int main(int argc, char** argv)
               }
               else
               {
-                if ((i < (maxDoubleDotj-10)) && (avgddavgz[i] < minDoubleDot1Z))
+                if ((i < (maxDoubleDot1j-10)) && (avgddavgz[i] < minDoubleDot1Z))
                 {
                   minDoubleDot1Z = avgddavgz[i];
                   minDoubleDot1i = i;
                 }
-                if ((i > (maxDoubleDotj+10)) && (avgddavgz[i] < minDoubleDot2Z))
+                if ((i > (maxDoubleDot1j+10)) && (avgddavgz[i] < minDoubleDot2Z))
                 {
                   minDoubleDot2Z = avgddavgz[i];
                   minDoubleDot2i = i;
@@ -847,14 +967,14 @@ int main(int argc, char** argv)
 
 
           base = length(a, b);
-
-          Bot.x = pointcloud[maxDoubleDotj + valid_begin].x;
-          Bot.y = pointcloud[maxDoubleDotj + valid_begin].y;
-          Bot.z = pointcloud[maxDoubleDotj + valid_begin].z;
-
-          y = Bot.y; // This is the y on the bottom of the steel plate Groove
-          BotZ = Bot.z;
-          TopZ = proj(a, b, Bot).z;
+/*
+          Top.x = pointcloud[begin].x;
+          Top.y = pointcloud[begin].y;
+          Top.z = pointcloud[begin].z;
+*/
+          y = a.y; // This is the y on the bottom of the steel plate Groove
+          // BotZ = Bot.z;
+          // TopZ = proj(a, b, Bot).z;
           if (first_y == 0.0)
           {
             first_y = y;
@@ -863,7 +983,7 @@ int main(int argc, char** argv)
           // y is known before entering into the Loop Unless this is the first line
           if (line_no != 0)
           {
-            thickness = (y - lastY) * cos(0.471233898038469); // Slice thickness is in Metre; it has slanted by 0.47 radian
+            thickness = (y - lastY) * cos(0.471233898038469); // Slice thickness is in Metre; it has slanted by 0.47 radian (27 degree)
             scanned_length += thickness;
           }
 
