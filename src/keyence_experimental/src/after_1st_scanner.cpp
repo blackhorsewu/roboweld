@@ -608,7 +608,7 @@ int main(int argc, char** argv)
           double doubleDotZ; // lastDoubleDiffZ;
           double height, Height;
           int valid_begin = 0;
-          int minDoubleDot1i, minDoubleDot2i;
+          int valid_end = 0;
           int cloudSize = pointcloud.size();
           bool first = true;
           bool second = false;
@@ -625,6 +625,9 @@ int main(int argc, char** argv)
           int j = 1;
           int maxDoubleDot1j;
           int maxDoubleDot2j;
+          int minDoubleDot1j;
+          int minDoubleDot2j;
+          int midGroove;
           double sumz = 0.0;
           double sumdavgz = 0.0;
           double sumdavgdavgz = 0.0;
@@ -718,17 +721,17 @@ int main(int argc, char** argv)
  * Should be able to work out the Gradient and the Derivative of the Gradient.               *
  * This node is to scan a groove already has gone through a first pass of welding. The shape *
  * of the groove has changed and we cannot find a Maximum of the Derivative of the Gradient  *
- * as the centre of the groove any more. However, one can assume the lowest point of Z as    *
- * centre of the groove. Then we can divide the scan into left and right parts along the     *
- * middle. Then find the Maximum and Minimum on both sides.                                  *
+ * as the centre of the groove any more. However, one can assume the mid-point of the scan   *
+ * to be the point of the groove when trying to find the LEFT and RIGHT min points. Because  *
+ * the min points are further away then the max points. So find the min points first. Then   *
+ * use the mid point between the min points to find the Max points on both sides.            *
  *********************************************************************************************/
           double minDoubleDot1Z = 0.0;
           double minDoubleDot2Z = 0.0;
           double maxDoubleDot1Z = 0.0;
-          double minZ = 1.0;
-          int minZj = 0;
+          double maxDoubleDot2Z = 0.0;
 
-          for (int i = 0; i < (cloudSize - 50); ++i)
+          for (int i = 0; i < cloudSize; ++i)
           {
             zz = pointcloud[i].z;
             if ((zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
@@ -742,12 +745,6 @@ int main(int argc, char** argv)
               }
               else
               {
-                if (zz < minZ)
-                {
-                  minZ = zz;
-                  minZj = j;
-                }
-
                 if (j < (w - m)) // from 1 to m
                 {                                                          //////////////// j = 1 to m /////
                   Z[j] = zz;
@@ -861,22 +858,25 @@ int main(int argc, char** argv)
                   davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
                   sumdavgdavgz += davgdavgz[(j-m)-m];
                   avgddavgz[((j-m)-m)-m] = sumdavgdavgz / w;
-/*
-                  if ((((j-m)-m)-m) < (cloudSize/2))
+                  /*****/
+                  if ((((j-m)-m)-m) < (cloudSize/2)) // LEFT hand side of the Groove
                   {
-                    if (avgddavgz[((j-m)-m)-m] > maxDoubleDot1Z)
+                    if (avgddavgz[((j-m)-m)-m] < minDoubleDot1Z)
                     {
-                      maxDoubleDot1Z = avgddavgz[((j-m)-m)-m];
-                      maxDoubleDot1j = ((j-m)-m)-m;
+                      minDoubleDot1Z = avgddavgz[((j-m)-m)-m];
+                      minDoubleDot1j = ((j-m)-m)-m;
                     }
                   }
 
-                  if (avgddavgz[((j-m)-m)-m] > maxDoubleDotZ)
+                  if ((((j-m)-m)-m) > (cloudSize/2)) // RIGHT hand side of the groove
                   {
-                    maxDoubleDotZ = avgddavgz[((j-m)-m)-m];
-                    maxDoubleDotj = ((j-m)-m)-m;
+                    if (avgddavgz[((j-m)-m)-m] < minDoubleDot2Z)
+                    {
+                      minDoubleDot2Z = avgddavgz[((j-m)-m)-m];
+                      minDoubleDot2j = ((j-m)-m)-m;
+                    }
                   }
-*/
+                  /*****/
                   if (write_X_file)
                   {
                     Xfile << (((j-m)-m)-m) << ", " << Z[((j-m)-m)-m] << ", " << avgz[((j-m)-m)-m] << ", " << davgz[((j-m)-m)-m] << ", "  << avgdavgz[((j-m)-m)-m] << 
@@ -889,17 +889,26 @@ int main(int argc, char** argv)
                 j++;
               }
             }
+            else
+            {
+              /* This is invalid point */
+              if (i > (cloudSize - 50)) valid_end = i;
+            }
           } // end of First Loop through the Scan Line
           if (write_X_file)
           {
             Xfile.close();
             file_no++;
           }
+          midGroove = (minDoubleDot1j+minDoubleDot2j)/2;
 
   ROS_INFO_STREAM("X step: " << global_x_increment * 1e3 << " mm");
-  ROS_INFO_STREAM("Valid at: " << valid_begin << "; 1st y: " << first_y * 1e3);
-  ROS_INFO_STREAM("Min Z: " << minZ << "; Min Z j: " << minZj);
-  ROS_INFO_STREAM("Max DD position: " << maxDoubleDot1j << " Line no.: " << line_no);
+  ROS_INFO_STREAM("Valid begin at: " << valid_begin << "; Valid end at: " << valid_end);
+  ROS_INFO_STREAM("1st y: " << first_y * 1e3);
+  ROS_INFO_STREAM("LEFT Min DD position: " << minDoubleDot1j << " File no.: " << file_no - 1);
+  ROS_INFO_STREAM("RIGHT Min DD position: " << minDoubleDot2j);
+  ROS_INFO_STREAM("Mid groove position: " << midGroove);
+
 
 /******************************************************************************************** 
  * Go through the data points the SECOND time. Next find the LEFT and RIGHT Min double d    *
@@ -927,22 +936,22 @@ int main(int argc, char** argv)
               }
               else
               {
-                if ((i < (maxDoubleDot1j-10)) && (avgddavgz[i] < minDoubleDot1Z))
+                if ((i < midGroove) && (avgddavgz[i]>maxDoubleDot1Z)) // LEFT hand side of the Groove
                 {
-                  minDoubleDot1Z = avgddavgz[i];
-                  minDoubleDot1i = i;
+                  maxDoubleDot1Z = avgddavgz[i];
+                  maxDoubleDot1j = i;
                 }
-                if ((i > (maxDoubleDot1j+10)) && (avgddavgz[i] < minDoubleDot2Z))
+                if ((i > midGroove) && (avgddavgz[i]>maxDoubleDot2Z)) // RIGHT hand side of the Groove
                 {
-                  minDoubleDot2Z = avgddavgz[i];
-                  minDoubleDot2i = i;
+                  maxDoubleDot2Z = avgddavgz[i];
+                  maxDoubleDot2j = i;
                 }
               }
             }
           } // End of Second Loop through the Scan Line
 
-  ROS_INFO_STREAM("Left Min DD position: " << minDoubleDot1i);
-  ROS_INFO_STREAM("Right Min DD position: " << minDoubleDot2i);
+  ROS_INFO_STREAM("Left Max DD position: " << maxDoubleDot1j + valid_begin);
+  ROS_INFO_STREAM("Right Max DD position: " << maxDoubleDot2j + valid_begin);
   
 /********************************************************************************************
  * After the three turning points are found, go through the data points THIRD time!         *
@@ -951,8 +960,8 @@ int main(int argc, char** argv)
  *     first line is finished then publish the fillers for the whole line outside the loop  *
  ********************************************************************************************/
           geometry_msgs::Point a, b, Top, Bot, Mid;
-          int begin = minDoubleDot1i + valid_begin;
-          int end = minDoubleDot2i + valid_begin;
+          int begin = minDoubleDot1j + valid_begin;
+          int end = minDoubleDot2j + valid_begin;
           double last_zB; // if inf then use last zB
           double base; // in metre
           // height;
@@ -1040,6 +1049,19 @@ int main(int argc, char** argv)
                 fillers.markers.push_back(filler);
                 // fillers_pub.publish(filler);
               }
+
+              /* 
+               * Try to display an axis for the torch to orient itself
+               */
+              Eigen::Isometry3d pose1 = Eigen::Isometry3d::Identity(); // Create pose for the axis
+              // The position should be the RIGHT hand side max DD
+              pose1.translation().x() = pointcloud[maxDoubleDot1j + valid_begin].x;
+              pose1.translation().y() = pointcloud[maxDoubleDot1j + valid_begin].y;
+              pose1.translation().z() = pointcloud[maxDoubleDot1j + valid_begin].z;
+              pose1 = pose1 * Eigen::AngleAxisd((1 - (22.5/180)) * M_PI, Eigen::Vector3d::UnitY()); // 67.5 degree around Y axis
+//              pose1 = pose1 * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()); // 67.5 degree around Y axis
+              visual_tools.publishAxis(pose1, rviz_visual_tools::XXXXSMALL);
+              visual_tools.trigger();
             }
           } // End of Third Loop through the Scan Line
 

@@ -375,7 +375,7 @@ int main(int argc, char** argv)
   // set up profile cloud publisher
   ros::Publisher pub = nh.advertise<Cloud>("profiles", 100);
 
-  bool write_Y_file = false; // write the whole scan brief data to a file
+  bool write_Y_file = true; // write the whole scan brief data to a file
   bool active_flag = false;
   int line_no = 0;
   int file_no = 0;
@@ -730,7 +730,7 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("X step: " << global_x_increment * 1e3 << " mm");
   ROS_INFO_STREAM("Valid at: " << valid_begin << "; 1st y: " << first_y * 1e3);
-  ROS_INFO_STREAM("Max DD position: " << maxDoubleDotj << " Line no.: " << line_no);
+  ROS_INFO_STREAM("Max DD position: " << maxDoubleDotj << " File no.: " << file_no - 1);
 
 /******************************************************************************************** 
  * Go through the data points the SECOND time. Next find the LEFT and RIGHT Min double d    *

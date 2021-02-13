@@ -61,9 +61,9 @@ def callback(mk_points):
         #ur5.movej_to_pose(pose)
         pose_list.append(pose)
         i+=1
-    ur5.movej_to_pose_list(pose_list)
-    ur5.set_digital_out(0, False)
-    ur5.movej(home)
+    # ur5.movej_to_pose_list(pose_list)
+    # ur5.set_digital_out(0, False)
+    # ur5.movej(home)
 
 def listerner():
     print("Subscribed to the wayPoints marker")
@@ -71,7 +71,8 @@ def listerner():
     # Subscribe to the topic "wayPoints" published by perception_node
     # the received message is of type visualization_msgs::Marker.
     # When the message is received, call "callback" defined above.
-    rospy.Subscriber("wayPoints", Marker, callback)
+    # rospy.Subscriber("wayPoints", Marker, callback)
+    rospy.Subscriber("rviz_visual_tools", Marker, callback)
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 

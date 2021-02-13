@@ -89,6 +89,15 @@ add_dependencies(
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+add_executable(
+  keyence_driver_node
+  src/keyence_driver_node.cpp
+)
+add_dependencies(
+  keyence_driver_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
 target_link_libraries(
   after_1st_scanner
   keyence_impl
@@ -101,6 +110,11 @@ target_link_libraries(
 )
 target_link_libraries(
   convex_scanner
+  keyence_impl
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(
+  keyence_driver_node
   keyence_impl
   ${catkin_LIBRARIES}
 )
@@ -131,6 +145,14 @@ install(
 install(
   TARGETS
   convex_scanner
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
+
+install(
+  TARGETS
+  keyence_driver_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
