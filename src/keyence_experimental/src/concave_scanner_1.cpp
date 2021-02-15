@@ -33,8 +33,8 @@
 #include <rviz_visual_tools/rviz_visual_tools.h>
 
 #include <string>
-#include <iostream>
-#include <fstream>
+// #include <iostream>
+// #include <fstream>
 
 #include <ctime>
 
@@ -341,10 +341,9 @@ int main(int argc, char** argv)
   // setup point cloud message (we reuse single one)
   // TODO: this won't work with nodelets
   Cloud::Ptr pc_msg(new Cloud);
-  Cloud::Ptr Y_pc_msg(new Cloud);
 
   // Another point cloud transformed into the world frame
-  // Cloud::Ptr transformed_pc_msg(new Cloud);
+  Cloud::Ptr transformed_pc_msg(new Cloud);
 
   // setup point Marker message
   visualization_msgs::MarkerArray fillers;
@@ -370,29 +369,26 @@ int main(int argc, char** argv)
   // message is essentially a line-strip of points
   pc_msg->height = 1;
 
-  Y_pc_msg->header.frame_id = frame_id;
-  Y_pc_msg->is_dense = false; // cloud could have NaNs
-  // message is essentially a line-strip of points
-  Y_pc_msg->height = 1;
-  /*
   transformed_pc_msg->header.frame_id = world_frame;
   transformed_pc_msg->is_dense = false;
-  */
 
   // set up profile cloud publisher
   ros::Publisher pub = nh.advertise<Cloud>("profiles", 100);
 
   bool write_Y_file = true; // write the whole scan brief data to a file
-  bool active_flag = true;
+  bool active_flag = false;
   int line_no = 0;
   int file_no = 0;
   int filler_id = 0;
   int marker_id = 1;
   
+  string file_name;
   ofstream Yfile;
+/*
   time_t now = time(0);
   tm *ltm = localtime(&now);
-
+  char name_text[1200];
+*/
   while (ros::ok())
   {
     try
@@ -452,81 +448,9 @@ int main(int argc, char** argv)
 
       if (write_Y_file)
       {
-        char name_text[1200];
-        char mon_text[10];
-        char day_text[10];
-        char hour_text[10];
-        char min_text[10];
-        int n;
-        switch (ltm->tm_mon)
-        {
-          case 0:
-            n = sprintf(mon_text, "Jan/");
-            break;
-          case 1:
-            n = sprintf(mon_text, "Feb/");
-            break;
-          case 2:
-            n = sprintf(mon_text, "Mar/");
-            break;
-          case 3:
-            n = sprintf(mon_text, "Apr/");
-            break;
-          case 4:
-            n = sprintf(mon_text, "May/");
-            break;
-          case 5:
-            n = sprintf(mon_text, "Jun/");
-            break;
-          case 6:
-            n = sprintf(mon_text, "Jul/");
-            break;
-          case 7:
-            n = sprintf(mon_text, "Aug/");
-            break;
-          case 8:
-            n = sprintf(mon_text, "Sep/");
-            break;
-          case 9:
-            n = sprintf(mon_text, "Oct/");
-            break;
-          case 10:
-            n = sprintf(mon_text, "Nov/");
-            break;
-          case 11:
-            n = sprintf(mon_text, "Dec/");
-            break;
-        }
-        n = sprintf(name_text, "/home/victor/Data/Volume/%d/",
-                               1900 + ltm->tm_year
-                   );
-        if (!mkdir(name_text, 0777))
-        { // folder Volume already exists
-          ROS_INFO_STREAM("Folder " << 1900 + ltm->tm_year << " for Volume was created.");
-        }
-        strcat(name_text, mon_text);
-        if (!mkdir(name_text, 0777))
-        {
-          ROS_INFO_STREAM("Folder " << mon_text << " for Volume was created.");
-        }
-        n = sprintf(day_text,"%d/", ltm->tm_mday);
-        n = sprintf(hour_text, "%d/", ltm->tm_hour);
-        n = sprintf(min_text, "%d-volume.csv", ltm->tm_min);
-        strcat(name_text, day_text);
-        if (!mkdir(name_text, 0777))
-        {
-          ROS_INFO_STREAM("Folder " << day_text << " for Volume was created.");
-        }
-        strcat(name_text, hour_text);
-        if (!mkdir(name_text, 0777))
-        {
-          ROS_INFO_STREAM("Folder " << hour_text << " for Volume was created.");
-        }
-        strcat(name_text, min_text);
-        Yfile.open(name_text);
-        cout << name_text << "\n";
+        file_name = "/home/victor/Data/Volume/2021/February/volume.csv";
+        Yfile.open(file_name);
         Yfile << "Width, Slice , Area, Plate , 1st Y, Y, Scanned Length, Volume\n";
-
       }
 
       // Main loop
@@ -566,16 +490,11 @@ int main(int argc, char** argv)
           pc_msg->points.clear();
           unpackProfileToPointCloud(resp.body.profile_info, resp.body.profile_points, *pc_msg, true);
 
-          /* There is no need to do any Transformation, since TF has already done it. This can be 
-           * verified by looking at the point cloud visualized in RViz.
-           * No, this is not true! The points of the cloud are relative to the scanner. The scanner
-           * is relative to the world. Therefore the Y of the points is always 0.
-           */
-          
           // Transform the pointcloud from Keyence Optical Frame to World Frame.
           // Make sure the pc_msg.header.frame_id is changed to world as well.
           tf::TransformListener listener;
           tf::StampedTransform  stransform;
+          tf2_ros::Buffer tf_buffer;
 
           sensor_msgs::PointCloud2 cloud_in;
 
@@ -597,7 +516,6 @@ int main(int argc, char** argv)
               ROS_ERROR("%s", ex.what());
           }
 
-          /*
           pcl::toROSMsg(*pc_msg, cloud_in);
 
           pcl_ros::transformPointCloud(world_frame,
@@ -606,25 +524,22 @@ int main(int argc, char** argv)
                                        transformed_cloud);
 
           pcl::fromROSMsg (transformed_cloud, *transformed_pc_msg_local);
-          */
 
           x = stransform.getOrigin().x();
           y = stransform.getOrigin().y();
           z = stransform.getOrigin().z();
-          
 
 /***********************************************************************************************
           cross_section_area = cross_section(*transformed_pc_msg_local, points);
 ************************************************************************************************/
-          // Cloud pointcloud = *transformed_pc_msg_local;
-          Cloud pointcloud = *pc_msg;
+          Cloud pointcloud = *transformed_pc_msg_local;
           double area = 0.0;
           double zz, lastZ;
           double dotZ, lastDotZ;
           double doubleDotZ; // lastDoubleDiffZ;
           double height, Height;
           int valid_begin = 0;
-          int valid_end = 0;
+          int minDoubleDot1i, minDoubleDot2i; // maxDoubleDoti;
           int cloudSize = pointcloud.size();
           bool first = true;
           bool second = false;
@@ -639,11 +554,7 @@ int main(int argc, char** argv)
           int w = 15;     // Number of points to take Average 
           int m = w / 2;  // Half of no. of average points
           int j = 1;
-          int maxDoubleDot1j;
-          int maxDoubleDot2j;
-          int minDoubleDot1j;
-          int minDoubleDot2j;
-          int midGroove;
+          int maxDoubleDotj;
           double sumz = 0.0;
           double sumdavgz = 0.0;
           double sumdavgdavgz = 0.0;
@@ -652,102 +563,21 @@ int main(int argc, char** argv)
 
           if (write_X_file)
           {
-            /* Before openning a file, check if the folders are there. If not, create them first
-             * First, Check the YEAR folder, then check the MONTH folder, then the DAY folder, 
-             * the HOUR folder, then the MINUTE folder. They have to be put into separate folders
-             * because for every run, it will generate, at least, more than hundread folders.
-            */
-            char name_text[1200];
-            char mon_text[100];
-            char day_text[100];
-            char hour_text[100];
-            char min_text[100];
-            int n;
-            switch (ltm->tm_mon)
-            {
-              case 0:
-                n = sprintf(mon_text, "Jan/");
-                break;
-              case 1:
-                n = sprintf(mon_text, "Feb/");
-                break;
-              case 2:
-                n = sprintf(mon_text, "Mar/");
-                break;
-              case 3:
-                n = sprintf(mon_text, "Apr/");
-                break;
-              case 4:
-                n = sprintf(mon_text, "May/");
-                break;
-              case 5:
-                n = sprintf(mon_text, "Jun/");
-                break;
-              case 6:
-                n = sprintf(mon_text, "Jul/");
-                break;
-              case 7:
-                n = sprintf(mon_text, "Aug/");
-                break;
-              case 8:
-                n = sprintf(mon_text, "Sep/");
-                break;
-              case 9:
-                n = sprintf(mon_text, "Oct/");
-                break;
-              case 10:
-                n = sprintf(mon_text, "Nov/");
-                break;
-              case 11:
-                n = sprintf(mon_text, "Dec/");
-                break;
-            }
-            n = sprintf(name_text, "/home/victor/Data/Profile/%d/", 1900 + ltm->tm_year);
-            if (!mkdir(name_text, 0777))
-            { // folder Volume already exists
-              ROS_INFO_STREAM("Folder " << 1900 + ltm->tm_year << " created.");
-            }
-            strcat(name_text, mon_text);
-            if (!mkdir(name_text, 0777))
-            {
-              ROS_INFO_STREAM("Folder " << mon_text << " created.");
-            }
-            n = sprintf(day_text,"%d/", ltm->tm_mday);
-            n = sprintf(hour_text, "%d/", ltm->tm_hour);
-            n = sprintf(min_text, "%d-profile_%d.csv", ltm->tm_min, file_no);
-
-            strcat(name_text, day_text);
-            if (!mkdir(name_text, 0777))
-            {
-              ROS_INFO_STREAM("Folder " << day_text << " created.");
-            }
-            strcat(name_text, hour_text);
-            if (!mkdir(name_text, 0777))
-            {
-              ROS_INFO_STREAM("Folder " << hour_text << " created.");
-            }
-            strcat(name_text, min_text);
-            Xfile.open(name_text);
-            cout << name_text << "\n";
+            file_name = "/home/victor/Data/profile/2021/February/profile_" + std::to_string(file_no) + ".csv";
+            Xfile.open(file_name);
             Xfile << "J, Z, Average Z, D Avg Z, Avg D Avg Z, D Avg D Avg Z, Avg DD Avg Z\n";
           }
 
-/*********************************************************************************************
- * Going through the scanned line data for the FIRST time.                                   *
- * Should be able to work out the Gradient and the Derivative of the Gradient.               *
- * This node is to scan a groove already has gone through a first pass of welding. The shape *
- * of the groove has changed and we cannot find a Maximum of the Derivative of the Gradient  *
- * as the centre of the groove any more. However, one can assume the mid-point of the scan   *
- * to be the point of the groove when trying to find the LEFT and RIGHT min points. Because  *
- * the min points are further away then the max points. So find the min points first. Then   *
- * use the mid point between the min points to find the Max points on both sides.            *
- *********************************************************************************************/
+/********************************************************************************************
+ * Going through the scanned line data for the FIRST time.                                  *
+ * Should be able to work out the Gradient and the Derivative of the Gradient, and also the *
+ * Maximum value of the Derivative of the Gradient, that is the deepest point of the Groove.*
+ ********************************************************************************************/
           double minDoubleDot1Z = 0.0;
           double minDoubleDot2Z = 0.0;
-          double maxDoubleDot1Z = 0.0;
-          double maxDoubleDot2Z = 0.0;
+          double maxDoubleDotZ = 0.0;
 
-          for (int i = 0; i < cloudSize; ++i)
+          for (int i = 0; i < (cloudSize - 50); ++i)
           {
             zz = pointcloud[i].z;
             if ((zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI) && (zz != KEYENCE_INFINITE_DISTANCE_VALUE_SI2)
@@ -874,25 +704,11 @@ int main(int argc, char** argv)
                   davgdavgz[(j-m)-m] = avgdavgz[(j-m)-m] - avgdavgz[((j-m)-m)-1];
                   sumdavgdavgz += davgdavgz[(j-m)-m];
                   avgddavgz[((j-m)-m)-m] = sumdavgdavgz / w;
-                  /*****/
-                  if ((((j-m)-m)-m) < (cloudSize/2)) // LEFT hand side of the Groove
+                  if (avgddavgz[((j-m)-m)-m] > maxDoubleDotZ)
                   {
-                    if (avgddavgz[((j-m)-m)-m] < minDoubleDot1Z)
-                    {
-                      minDoubleDot1Z = avgddavgz[((j-m)-m)-m];
-                      minDoubleDot1j = ((j-m)-m)-m;
-                    }
+                    maxDoubleDotZ = avgddavgz[((j-m)-m)-m];
+                    maxDoubleDotj = ((j-m)-m)-m;
                   }
-
-                  if ((((j-m)-m)-m) > (cloudSize/2)) // RIGHT hand side of the groove
-                  {
-                    if (avgddavgz[((j-m)-m)-m] < minDoubleDot2Z)
-                    {
-                      minDoubleDot2Z = avgddavgz[((j-m)-m)-m];
-                      minDoubleDot2j = ((j-m)-m)-m;
-                    }
-                  }
-                  /*****/
                   if (write_X_file)
                   {
                     Xfile << (((j-m)-m)-m) << ", " << Z[((j-m)-m)-m] << ", " << avgz[((j-m)-m)-m] << ", " << davgz[((j-m)-m)-m] << ", "  << avgdavgz[((j-m)-m)-m] << 
@@ -905,26 +721,16 @@ int main(int argc, char** argv)
                 j++;
               }
             }
-            else
-            {
-              /* This is invalid point */
-              if (i > (cloudSize - 50)) valid_end = i;
-            }
           } // end of First Loop through the Scan Line
           if (write_X_file)
           {
             Xfile.close();
             file_no++;
           }
-          midGroove = (minDoubleDot1j+minDoubleDot2j)/2;
 
   ROS_INFO_STREAM("X step: " << global_x_increment * 1e3 << " mm");
-  ROS_INFO_STREAM("Valid begin at: " << valid_begin << "; Valid end at: " << valid_end);
-  ROS_INFO_STREAM("1st y: " << first_y * 1e3);
-  ROS_INFO_STREAM("LEFT Min DD position: " << minDoubleDot1j << " File no.: " << file_no - 1);
-  ROS_INFO_STREAM("RIGHT Min DD position: " << minDoubleDot2j);
-  ROS_INFO_STREAM("Mid groove position: " << midGroove);
-
+  ROS_INFO_STREAM("Valid at: " << valid_begin << "; 1st y: " << first_y * 1e3);
+  ROS_INFO_STREAM("Max DD position: " << maxDoubleDotj << " File no.: " << file_no - 1);
 
 /******************************************************************************************** 
  * Go through the data points the SECOND time. Next find the LEFT and RIGHT Min double d    *
@@ -952,22 +758,22 @@ int main(int argc, char** argv)
               }
               else
               {
-                if ((i < midGroove) && (avgddavgz[i]>maxDoubleDot1Z)) // LEFT hand side of the Groove
+                if ((i < (maxDoubleDotj-10)) && (avgddavgz[i] < minDoubleDot1Z))
                 {
-                  maxDoubleDot1Z = avgddavgz[i];
-                  maxDoubleDot1j = i;
+                  minDoubleDot1Z = avgddavgz[i];
+                  minDoubleDot1i = i;
                 }
-                if ((i > midGroove) && (avgddavgz[i]>maxDoubleDot2Z)) // RIGHT hand side of the Groove
+                if ((i > (maxDoubleDotj+10)) && (avgddavgz[i] < minDoubleDot2Z))
                 {
-                  maxDoubleDot2Z = avgddavgz[i];
-                  maxDoubleDot2j = i;
+                  minDoubleDot2Z = avgddavgz[i];
+                  minDoubleDot2i = i;
                 }
               }
             }
           } // End of Second Loop through the Scan Line
 
-  ROS_INFO_STREAM("Left Max DD position: " << maxDoubleDot1j + valid_begin);
-  ROS_INFO_STREAM("Right Max DD position: " << maxDoubleDot2j + valid_begin);
+  ROS_INFO_STREAM("Left Min DD position: " << minDoubleDot1i);
+  ROS_INFO_STREAM("Right Min DD position: " << minDoubleDot2i);
   
 /********************************************************************************************
  * After the three turning points are found, go through the data points THIRD time!         *
@@ -976,8 +782,8 @@ int main(int argc, char** argv)
  *     first line is finished then publish the fillers for the whole line outside the loop  *
  ********************************************************************************************/
           geometry_msgs::Point a, b, Top, Bot, Mid;
-          int begin = minDoubleDot1j + valid_begin;
-          int end = minDoubleDot2j + valid_begin;
+          int begin = minDoubleDot1i + valid_begin;
+          int end = minDoubleDot2i + valid_begin;
           double last_zB; // if inf then use last zB
           double base; // in metre
           // height;
@@ -992,14 +798,14 @@ int main(int argc, char** argv)
 
 
           base = length(a, b);
-/*
-          Top.x = pointcloud[begin].x;
-          Top.y = pointcloud[begin].y;
-          Top.z = pointcloud[begin].z;
-*/
-          // y = a.y; // This is the y on the top of the steel plate Groove
-          // BotZ = Bot.z;
-          // TopZ = proj(a, b, Bot).z;
+
+          Bot.x = pointcloud[maxDoubleDotj + valid_begin].x;
+          Bot.y = pointcloud[maxDoubleDotj + valid_begin].y;
+          Bot.z = pointcloud[maxDoubleDotj + valid_begin].z;
+
+          y = Bot.y; // This is the y on the bottom of the steel plate Groove
+          BotZ = Bot.z;
+          TopZ = proj(a, b, Bot).z;
           if (first_y == 0.0)
           {
             first_y = y;
@@ -1008,7 +814,7 @@ int main(int argc, char** argv)
           // y is known before entering into the Loop Unless this is the first line
           if (line_no != 0)
           {
-            thickness = (y - lastY) * cos(0.471233898038469); // Slice thickness is in Metre; it has slanted by 0.47 radian (27 degree)
+            thickness = (y - lastY) * cos(0.471233898038469); // Slice thickness is in Metre; it has slanted by 0.47 radian
             scanned_length += thickness;
           }
 
@@ -1040,16 +846,13 @@ int main(int argc, char** argv)
               { 
                 visualization_msgs::Marker filler;
                 // Fill the Markers fixed parts first
-                // filler.header.frame_id = world_frame;
-                filler.header.frame_id = frame_id;
+                filler.header.frame_id = world_frame;
                 filler.ns = "fillers";
                 filler.action = visualization_msgs::Marker::ADD;
-                /*
                 filler.pose.orientation.x = stransform.getRotation().x();
                 filler.pose.orientation.y = stransform.getRotation().y();
                 filler.pose.orientation.z = stransform.getRotation().z();
                 filler.pose.orientation.w = stransform.getRotation().w();
-                */
                 filler.type = visualization_msgs::Marker::CUBE;
                 filler.color.r = 1;
                 filler.color.a = 1;
@@ -1068,24 +871,10 @@ int main(int argc, char** argv)
                 fillers.markers.push_back(filler);
                 // fillers_pub.publish(filler);
               }
-
-              /* 
-               * Try to display an axis for the torch to orient itself
-               */
-              Eigen::Isometry3d pose1 = Eigen::Isometry3d::Identity(); // Create pose for the axis
-              // The position should be the RIGHT hand side max DD
-              pose1.translation().x() = pointcloud[maxDoubleDot1j + valid_begin].x;
-              pose1.translation().y() = pointcloud[maxDoubleDot1j + valid_begin].y;
-              pose1.translation().z() = pointcloud[maxDoubleDot1j + valid_begin].z;
-              pose1 = pose1 * Eigen::AngleAxisd((1 - (22.5/180)) * M_PI, Eigen::Vector3d::UnitY()); // 67.5 degree around Y axis
-//              pose1 = pose1 * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()); // 67.5 degree around Y axis
-              visual_tools.publishAxis(pose1, rviz_visual_tools::XXXXSMALL);
-              visual_tools.trigger();
             }
           } // End of Third Loop through the Scan Line
 
-          // *transformed_pc_msg += *transformed_pc_msg_local;
-          *Y_pc_msg += *pc_msg;
+          *transformed_pc_msg += *transformed_pc_msg_local;
 
           area = area * cos(0.471233898038469);
           volume += area * thickness;
@@ -1124,8 +913,7 @@ int main(int argc, char** argv)
           visual_tools.trigger();  /************ Switching the display ON and OFF here. *****************/
 
           // publish pointcloud
-          // pub.publish(transformed_pc_msg);
-          pub.publish(Y_pc_msg);
+          pub.publish(transformed_pc_msg);
           line_no++;
           lastY = y;
         } // finish scanning a good line
