@@ -1,6 +1,54 @@
 
  roboweld
 
+ 15 February 2021.
+
+ I have started to separate my scanning function from the Keyence Driver Node. This will 
+ leave the Driver untouched. If there is any change or update from ROS or Keyence it should
+ not affect my scanning programs as long as they do not change the API's.
+
+ I subscribe to the point cloud published by the Driver. Then I use that point cloud to do
+ my own processing.
+
+ 5 February 2021.
+
+ Added the .gitignore file to ignore both the build/ and devel/. Moved the Data/ folder to
+ home directory instead of under roboweld/.
+
+ Create a separate folder for each run for the profiles.
+
+ 4 February 2021.
+
+ First, try to find the lines that best fit the side of the groove and the bottom of the 
+ groove. The bottom of the groove is actually the top of the weldment of the first pass.
+ Then, find the angle for the welding torch to bisect the angle between the found two lines.
+
+ After that, it would be helpful to publish the axis of the points along the path for the 
+ second pass. Next, change the motion node, that uses the URx, to drive the manipulator to
+ do the welding.
+
+ It is very important to note that I have changed the original Keyence Driver and now named
+ it for two different purposes. 1. I called it concave_scanner and the other convex_scanner.
+ The convex_scanner is for the back of the joint. There, the weldment comes up like a ridge.
+
+ Now, I am going to change the concave_scanner agaain. I should make a copy of it first. 
+ The new one will be called after_1st_scanner. This will give me the left edge in the groove.
+
+ 3 February 2021.
+
+ It is necessary, if needed, to organise the files of Data from the program into directories.
+ The organisation should be by date and time. There is a Directory - Data. Under that there
+ are subdirectories for years and then for months.
+
+ 29 January 2021.
+
+ The scanning of a Concave Groove is basically working well for me. The next thing is to scan
+ the back of such a Welded Groove. This turns out to be a Convex Groove. So I must adapt the
+ current keyence driver node into one that can do Convex scanning. Therefore, I want to change
+ the naming of the current "keyence_driver_node" into "concave_scanner" and the new one as
+ "convex_scanner". This means I need to cahnge the CMakeLists.txt, of the keyence_experimental
+ package, to reflect the changes.
+
  18 January 2021.
 
  Over the last 10 days, work is being done on the overcoming problems of the Gradient and the

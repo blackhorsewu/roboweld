@@ -36,8 +36,8 @@ const static double KEYENCE_INFINITE_DISTANCE_VALUE_SI = -999.9990 / 1e3;
 const static double KEYENCE_INFINITE_DISTANCE_VALUE_SI2 = -999.9970 / 1e3;
 
 // default values for parameters
-const static std::string DEFAULT_FRAME_ID = "sensor_optical_frame";
-const static std::string DEFAULT_WORLD_FRAME = "world";
+// const static std::string DEFAULT_FRAME_ID = "sensor_optical_frame";
+// const static std::string DEFAULT_WORLD_FRAME = "world";
 
 // local types
 typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
@@ -123,13 +123,13 @@ int main(int argc, char** argv)
   double volume = 0.0;
   double scanned_length = 0.0;
 
-  pnh.param<std::string>("frame_id", scanner_frame, DEFAULT_FRAME_ID);
-  pnh.param<std::string>("world_frame", world_frame, DEFAULT_WORLD_FRAME);
+  // pnh.param<std::string>("frame_id", scanner_frame, DEFAULT_FRAME_ID);
+  // pnh.param<std::string>("world_frame", world_frame, DEFAULT_WORLD_FRAME);
 
   // Point Cloud topic
   std::string cloud_topic;
   
-  cloud_topic = "profiles";
+  cloud_topic = "profiles"; // The cloud published by the Keyence Driver
   world_frame = "world";
   scanner_frame = "lj_v7200_optical_frame";
 
