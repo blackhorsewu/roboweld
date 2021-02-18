@@ -544,7 +544,7 @@ int main(int argc, char** argv)
           bool first = true;
           bool second = false;
           bool third = false;
-          bool write_X_file = true; // write data of each scan line to a file
+          bool write_X_file = false; // write data of each scan line to a file
           ofstream Xfile;
 
           // Line list pose
@@ -803,7 +803,7 @@ int main(int argc, char** argv)
           Bot.y = pointcloud[maxDoubleDotj + valid_begin].y;
           Bot.z = pointcloud[maxDoubleDotj + valid_begin].z;
 
-          y = Bot.y; // This is the y on the bottom of the steel plate Groove
+          // y = Bot.y; // This is the y on the bottom of the steel plate Groove
           BotZ = Bot.z;
           TopZ = proj(a, b, Bot).z;
           if (first_y == 0.0)
