@@ -28,7 +28,6 @@
      3. The Kinect V2, RGBD camera provides the point clouds that we need.
      4. The UR5, our robot arm, with the Straight Fronius Torch as its end effector.
      5. The Keyence LJ7200 Laser Scanner attached to the torch holder.
-     6. The RealSense D435i attached to the torch holder.
 -->
 
   <!-- defining tool -->
@@ -151,19 +150,11 @@
      <child link="tail"/>
   </joint>
 
-  <!-- Import the realsense D435i description -->
+  <!-- Import the realsense D435i description
   <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
   <xacro:sensor_d435 parent="ee_link" use_nominal_extrinsics="true" name="d435i">
-<!--    
-    <origin xyz="0.16026 0 0.01829" rpy="${pi} ${-pi} ${pi}"/>
-
-    <origin xyz="0.18515 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
-
-    <origin xyz="0.19738 0 0.00436" rpy="${pi} -2.827433388230814 ${pi}"/>
--->
-
     <origin xyz="0.20038 0.08064 0.105" rpy="${-pi/2} ${pi} 2.827433388230814"/>
-  </xacro:sensor_d435>
+  </xacro:sensor_d435> -->
 
   <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
   <xacro:kinect2 prefix=""/>

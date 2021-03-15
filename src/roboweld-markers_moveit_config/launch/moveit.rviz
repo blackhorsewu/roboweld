@@ -4,17 +4,12 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Grid1/Offset1
         - /MotionPlanning1
-        - /MotionPlanning1/Scene Robot1
         - /MotionPlanning1/Planning Request1
-        - /MarkerArray1
-        - /MarkerArray1/Namespaces1
         - /TF1
         - /TF1/Frames1
-        - /MarkerArray2
-      Splitter Ratio: 0.4354066848754883
-    Tree Height: 973
+      Splitter Ratio: 0.7425600290298462
+    Tree Height: 452
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -29,8 +24,8 @@ Toolbars:
 Visualization Manager:
   Class: ""
   Displays:
-    - Alpha: 1
-      Cell Size: 0.05000000074505806
+    - Alpha: 0.5
+      Cell Size: 1
       Class: rviz/Grid
       Color: 160; 160; 164
       Enabled: true
@@ -44,8 +39,8 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 30
-      Reference Frame: table
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
       Value: true
     - Acceleration_Scaling_Factor: 1
       Class: moveit_rviz_plugin/MotionPlanning
@@ -89,47 +84,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          d435i_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_color_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_color_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_depth_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_depth_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra1_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra1_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra2_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra2_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           ee_link:
             Alpha: 1
             Show Axes: false
@@ -206,7 +160,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-        Loop Animation: false
+        Loop Animation: true
         Robot Alpha: 0.5
         Robot Color: 150; 50; 150
         Show Robot Collision: false
@@ -226,10 +180,10 @@ Visualization Manager:
         Colliding Link Color: 255; 0; 0
         Goal State Alpha: 1
         Goal State Color: 250; 128; 0
-        Interactive Marker Size: 0.15000000596046448
+        Interactive Marker Size: 0.20000000298023224
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
-        Query Goal State: false
+        Query Goal State: true
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
@@ -260,47 +214,6 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          d435i_bottom_screw_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_color_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_color_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_depth_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_depth_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra1_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra1_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra2_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_infra2_optical_frame:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          d435i_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           ee_link:
             Alpha: 1
             Show Axes: false
@@ -377,97 +290,19 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-        Robot Alpha: 1
+        Robot Alpha: 0.5
         Show Robot Collision: false
         Show Robot Visual: true
       Value: true
       Velocity_Scaling_Factor: 1
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz_visual_tools
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Camera
-      Enabled: true
-      Image Rendering: background and overlay
-      Image Topic: /kinect2/hd/image_color_rect
-      Name: Camera
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: true
-      Visibility:
-        Grid: true
-        MarkerArray: true
-        MotionPlanning: true
-        PointCloud2: true
-        TF: true
-        Value: true
-      Zoom Factor: 1
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 0.2044835090637207
-        Min Value: -8.745948791503906
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 2
-      Size (m): 0.009999999776482582
-      Style: Points
-      Topic: /Y_profiles
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
     - Class: rviz/TF
       Enabled: true
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        ar_marker_0:
-          Value: true
         base:
-          Value: false
+          Value: true
         base_link:
-          Value: false
-        d435i_bottom_screw_frame:
-          Value: false
-        d435i_color_frame:
-          Value: false
-        d435i_color_optical_frame:
-          Value: false
-        d435i_depth_frame:
-          Value: false
-        d435i_depth_optical_frame:
-          Value: false
-        d435i_infra1_frame:
-          Value: false
-        d435i_infra1_optical_frame:
-          Value: false
-        d435i_infra2_frame:
-          Value: false
-        d435i_infra2_optical_frame:
-          Value: false
-        d435i_link:
           Value: false
         ee_link:
           Value: false
@@ -478,7 +313,7 @@ Visualization Manager:
         kinect2_link:
           Value: false
         kinect2_rgb_optical_frame:
-          Value: true
+          Value: false
         lj_v7200_frame:
           Value: false
         lj_v7200_optical_frame:
@@ -491,8 +326,6 @@ Visualization Manager:
           Value: false
         tool0:
           Value: false
-        tool0_controller:
-          Value: false
         upper_arm_link:
           Value: false
         world:
@@ -503,24 +336,21 @@ Visualization Manager:
           Value: false
         wrist_3_link:
           Value: false
-      Marker Scale: 0.30000001192092896
+      Marker Scale: 1
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
         world:
           kinect2_link:
             kinect2_rgb_optical_frame:
-              ar_marker_0:
-                {}
               kinect2_ir_optical_frame:
                 {}
           table:
             base_link:
               base:
-                tool0_controller:
-                  {}
+                {}
               shoulder_link:
                 upper_arm_link:
                   forearm_link:
@@ -528,20 +358,6 @@ Visualization Manager:
                       wrist_2_link:
                         wrist_3_link:
                           ee_link:
-                            d435i_bottom_screw_frame:
-                              d435i_link:
-                                d435i_color_frame:
-                                  d435i_color_optical_frame:
-                                    {}
-                                d435i_depth_frame:
-                                  d435i_depth_optical_frame:
-                                    {}
-                                d435i_infra1_frame:
-                                  d435i_infra1_optical_frame:
-                                    {}
-                                d435i_infra2_frame:
-                                  d435i_infra2_optical_frame:
-                                    {}
                             tail:
                               {}
                           lj_v7200_frame:
@@ -551,74 +367,6 @@ Visualization Manager:
                             {}
       Update Interval: 0
       Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: RGB8
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 2
-      Size (m): 0.003000000026077032
-      Style: Spheres
-      Topic: /kinect2/sd/points
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 2
-      Size (m): 0.009999999776482582
-      Style: Points
-      Topic: /object
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: fillers
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -635,32 +383,30 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.536752223968506
+      Distance: 2.996500015258789
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.6703859567642212
-        Y: 0.1955472230911255
-        Z: 1.9903573047486134e-6
+        X: 0.11356700211763382
+        Y: 0.10592000186443329
+        Z: 2.2351800055275817e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: -0.1952018141746521
+      Pitch: 0.2047973871231079
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 4.659713268280029
+      Yaw: 4.689939498901367
     Saved: ~
 Window Geometry:
-  Camera:
-    collapsed: false
   Displays:
     collapsed: false
-  Height: 1025
+  Height: 1145
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -669,7 +415,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002a20000029dfc0200000009fb000000100044006900730070006c006100790073030000078f0000000b000001a60000040cfb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d0065007200610300000c1f00000004000002db0000024afb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067020000096c00000012000002a200000196fb0000000c00430061006d0065007200610300000c2300000214000002a2000001b7fb00000024005200760069007a00560069007300750061006c0054006f006f006c00730047007500690200000a2f000001b5000001d90000007200000780000003a700000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002a20000041ffc0200000007fb000000100044006900730070006c006100790073010000003d00000201000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000244000002180000017d00ffffff000004d80000041f00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1920

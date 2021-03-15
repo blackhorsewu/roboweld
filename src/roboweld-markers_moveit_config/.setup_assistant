@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: roboweld_support
+    relative_path: urdf/roboweldMarkers.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/roboweld.srdf
+  CONFIG:
+    author_name: Victor Wu
+    author_email: victor.wu@polyu.edu
+    generated_timestamp: 1615793642

@@ -331,7 +331,8 @@ int main(int argc, char *argv[])
   rvizMarkerPub_ = n.advertise < visualization_msgs::Marker > ("visualization_marker", 0);
 	
   //Give tf a chance to catch up before the camera callback starts asking for transforms
-  ros::Duration(1.0).sleep();
+  //ros::Duration(1.0).sleep();
+  ros::Duration(0.5).sleep();
   ros::spinOnce();			
 	 
   //Subscribe to topics and set up callbacks
