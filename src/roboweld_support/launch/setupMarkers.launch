@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find roboweld_moveit_config)/launch/roboweld_planning_executionRealsense.launch">
+  <include file="$(find roboweld-markers_moveit_config)/launch/roboweld-markers_planning_execution.launch">
 
 <!-- Simulated Robot in RViz 
     <arg name="sim" default="true" />

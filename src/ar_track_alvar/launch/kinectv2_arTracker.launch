@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
 <launch>
-	<arg name="marker_size" default="4.5" />
+	<arg name="marker_size" default="5.0" />
 	<arg name="max_new_marker_error" default="0.00008" />
 	<arg name="max_track_error" default="0.0002" />
 	<arg name="cam_image_topic" default="/kinect2/hd/image_color" />

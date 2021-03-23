@@ -187,6 +187,7 @@ add_executable(rs_percept src/rs_percept.cpp)
 add_executable(roboweld_node src/roboweld_node.cpp)
 add_executable(descartes_node src/descartes_node.cpp)
 add_executable(move_robot src/move_robot.cpp) # used for ROS2 bridging support
+add_executable(threeD_node src/threeD_node.cpp)
 ## add_executable(perception_node src/perception_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -203,6 +204,7 @@ add_dependencies(rs_percept ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTE
 add_dependencies(roboweld_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(descartes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(move_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(threeD_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(vision_node ${catkin_LIBRARIES})
@@ -211,6 +213,7 @@ target_link_libraries(rs_percept ${catkin_LIBRARIES})
 target_link_libraries(roboweld_node ${catkin_LIBRARIES})
 target_link_libraries(descartes_node ${catkin_LIBRARIES})
 target_link_libraries(move_robot ${catkin_LIBRARIES})
+target_link_libraries(threeD_node ${catkin_LIBRARIES})
 ## target_link_libraries(perception_node ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 #############

@@ -133,6 +133,10 @@ add_executable(realsense nodes/realsense.cpp)
 target_link_libraries(realsense ar_track_alvar ${catkin_LIBRARIES})
 add_dependencies(realsense ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS} ${PROJECT_NAME}_gencfg)
 
+add_executable(tf_broadcast nodes/tf_broadcast.cpp)
+target_link_libraries(tf_broadcast ar_track_alvar ${catkin_LIBRARIES})
+add_dependencies(tf_broadcast ${PROJECT_NAME}_gencpp  ${GENCPP_DEPS} ${PROJECT_NAME}_gencfg)
+
 
 
 

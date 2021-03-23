@@ -47,6 +47,12 @@
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/image_encodings.h>
 
+#include <pcl_conversions/pcl_conversions.h>
+#include "pcl_ros/transforms.h"
+#include <pcl_ros/point_cloud.h>
+
+#include <pcl/point_types.h>
+
 using namespace alvar;
 using namespace std;
 
@@ -198,7 +204,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
       //Get the transformation from the Camera to the output frame for this image capture
       tf::StampedTransform CamToOutput;
       try{
-	tf_listener->waitForTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, ros::Duration(1.0));
+	tf_listener->waitForTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, ros::Duration(0.5)); // Victor Wu 18 Mar 2021.
 	tf_listener->lookupTransform(output_frame, image_msg->header.frame_id, image_msg->header.stamp, CamToOutput);
       }
       catch (tf::TransformException ex){
@@ -329,10 +335,10 @@ int main(int argc, char *argv[])
   tf_broadcaster = new tf::TransformBroadcaster();
   arMarkerPub_ = n.advertise < ar_track_alvar_msgs::AlvarMarkers > ("ar_pose_marker", 0);
   rvizMarkerPub_ = n.advertise < visualization_msgs::Marker > ("visualization_marker", 0);
-	
+
   //Give tf a chance to catch up before the camera callback starts asking for transforms
   //ros::Duration(1.0).sleep();
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.3).sleep();
   ros::spinOnce();			
 	 
   //Subscribe to topics and set up callbacks
