@@ -12,8 +12,8 @@ int main(int argc, char** argv){
   while(n.ok()){
     broadcaster.sendTransform(
       tf::StampedTransform(
-        tf::Transform(tf::Quaternion(0, 0, 0.7071068, 0.7071068), tf::Vector3(0.0, 0.0, 0.0)),
-        ros::Time::now(),"ar_marker_0", "d435i_link"));
+        tf::Transform(tf::Quaternion(-0.4247081, -0.1759199, 0.8204733, -0.3398512), tf::Vector3(0.05025, 0.05025, -0.11427)),
+        ros::Time::now(),"ar_marker_2", "d435i_link"));
     r.sleep();
   }
 }

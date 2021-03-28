@@ -12,6 +12,7 @@
 #include <pcl/point_types.h>
 
 #include <pcl/filters/passthrough.h>
+#include <pcl/filters/crop_box.h>
 
 #include <ur_msgs/SetIO.h>
 #include <ur_msgs/IOStates.h>
@@ -31,7 +32,7 @@ ros::Publisher pub; // it will be initialised in main
 
 ros::ServiceClient srv_SetIO;
 
-pcl::PointCloud<pcl::PointXYZRGB> pcl_threeD_cloud; // cumulated cloud
+pcl::PointCloud<pcl::PointXYZRGB> pcl_cumulated_cloud; // cumulated cloud
 
 /*
 class RS_cloud // The class
@@ -63,100 +64,72 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& rs_cloud)
   tf::TransformListener listener;
   tf::StampedTransform stransform;
 
-  try
-  {
-    // Wait for TF to give us the transformation
-    listener.waitForTransform("world",
-                              rs_cloud->header.frame_id,
-                              ros::Time::now(),
-                              ros::Duration(0.3));
-    listener.lookupTransform ("world",
-                              rs_cloud->header.frame_id,
-                              ros::Time(0),
-                              stransform);
-  }
-  catch(tf::TransformException ex)
-  {
-    ROS_ERROR("%s", ex.what());
-  }
-  sensor_msgs::PointCloud2 transformed_cloud;
-
-  // Actually doing the Transformation
-  pcl_ros::transformPointCloud("world",
-                               stransform,
-                               *rs_cloud,
-                               transformed_cloud);
-
-  // Convert the ROS Point Cloud into a PCL Point Cloud
-  // before PCL filters can be used on it.
-  pcl::PointCloud<pcl::PointXYZRGB> cloud;
-
-  pcl::fromROSMsg(transformed_cloud, cloud) ;
-
-  // The conversion does not copy the Frame ID and we have to do it explicitly
-  pcl_threeD_cloud.header.frame_id = cloud.header.frame_id;
-  
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-                       cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB> (cloud));
-
-  // Crop the Point Cloud to Just Above the Welding Table only
-  // to focus our attention.
-
-  // Filter in X
-  pcl::PointCloud<pcl::PointXYZRGB> xf_cloud, yf_cloud, zf_cloud;
-  pcl::PassThrough<pcl::PointXYZRGB> pass_x;
-
-  pass_x.setInputCloud(cloud_ptr);
-  pass_x.setFilterFieldName("x");
-  pass_x.setFilterLimits(x_filter_min, x_filter_max);
-  pass_x.filter(xf_cloud);
-
-  // Filter in Y
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
-                       xf_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>(xf_cloud));
-  pcl::PassThrough<pcl::PointXYZRGB> pass_y;
-
-  pass_y.setInputCloud(xf_cloud_ptr);
-  pass_y.setFilterFieldName("y");
-  pass_y.setFilterLimits(y_filter_min, y_filter_max);
-  pass_y.filter(yf_cloud);
-
-  // Filter in Z
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
-                       yf_cloud_ptr (new pcl::PointCloud<pcl::PointXYZRGB>(yf_cloud));
-  pcl::PassThrough<pcl::PointXYZRGB> pass_z;
-
-  pass_z.setInputCloud(yf_cloud_ptr);
-  pass_z.setFilterFieldName("z");
-  pass_z.setFilterLimits(z_filter_min, z_filter_max);
-  pass_z.filter(zf_cloud);
-
-  // Concatinate the Local Cloud to the Cumulated Cloud
-  // Only when we feel comfortable with what we see
-  // Indicated by a Switch Connected to the UR5 Controller
-  /* ur_msgs::SetIO srv;
-
-  srv.request.fun = 0;
-  srv.request.pin = 1;
-  srv.request.state = 1;
-
-  if (srv_SetIO.call(srv))
-  {
-    ROS_INFO("True");
-  }
-  else
-  {
-    ROS_INFO("False");
-  }
-  */
-
   if (cloud_enable)
   {
-    pcl_threeD_cloud += zf_cloud;
-  }
+    ROS_INFO("Cloud Enabled.");
+    try
+    {
+      // Wait for TF to give us the transformation
+      listener.waitForTransform("world",
+                                rs_cloud->header.frame_id,
+                                ros::Time::now(),
+                                ros::Duration(0.5));
+      listener.lookupTransform ("world",
+                                rs_cloud->header.frame_id,
+                                ros::Time(0),
+                                stransform);
+    }
+    catch(tf::TransformException ex)
+    {
+      ROS_ERROR("%s", ex.what());
+    }
+    sensor_msgs::PointCloud2 transformed_cloud;
 
-  // finish processing it then publish it
-  pub.publish(pcl_threeD_cloud);
+    // Actually doing the Transformation
+    pcl_ros::transformPointCloud("world",
+                                stransform,
+                                *rs_cloud,
+                                transformed_cloud);
+
+    // Convert the ROS Point Cloud into a PCL Point Cloud
+    // before PCL filters can be used on it.
+    pcl::PointCloud<pcl::PointXYZRGB> cloud;
+
+    pcl::fromROSMsg(transformed_cloud, cloud) ;
+
+    // The conversion does not copy the Frame ID and we have to do it explicitly
+    pcl_cumulated_cloud.header.frame_id = cloud.header.frame_id;
+    
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+                        cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB> (cloud));
+
+    // Crop the Point Cloud to Just Above the Welding Table only
+    // to focus our attention.
+
+    pcl::PointCloud<pcl::PointXYZRGB> cropped_cloud;
+    pcl::CropBox<pcl::PointXYZRGB> crop;
+
+    crop.setInputCloud(cloud_ptr);
+
+    Eigen::Vector4f min_point = Eigen::Vector4f(x_filter_min, y_filter_min, z_filter_min, 0);
+    Eigen::Vector4f max_point = Eigen::Vector4f(x_filter_max, y_filter_max, z_filter_max, 0);
+
+    crop.setMin(min_point);
+    crop.setMax(max_point);
+
+    crop.filter(cropped_cloud);
+
+    ROS_INFO("The Cloud cropped.");
+
+    // Concatinate the Local Cloud to the Cumulated Cloud
+    // Only when we feel comfortable with what we see
+    // Indicated by a Switch Connected to the UR5 Controller
+
+    pcl_cumulated_cloud += cropped_cloud;
+
+    // finish processing it then publish it
+    pub.publish(pcl_cumulated_cloud);
+  }
 }
 
 int main(int argc, char** argv)
@@ -165,7 +138,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh, pnh("~");
 
   // set up profile cloud publisher for PCL point clouds
-  pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("threeD_cloud", 1);
+  pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("cumulated_cloud", 1);
 
   // Listen for Point Cloud - from d435i
 

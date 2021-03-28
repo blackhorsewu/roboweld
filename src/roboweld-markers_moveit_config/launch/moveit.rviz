@@ -4,11 +4,19 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /MotionPlanning1
         - /MotionPlanning1/Scene Robot1
+        - /TF1
         - /TF1/Frames1
+        - /TF1/Frames1/ar_marker_21
+        - /TF1/Frames1/ar_marker_21/Position1
+        - /TF1/Frames1/d435i_link1
+        - /TF1/Frames1/d435i_link1/Position1
+        - /TF1/Frames1/ar_marker_41
+        - /TF1/Frames1/ar_marker_41/Position1
         - /PointCloud21
         - /PointCloud22
-        - /Camera1/Status1
+        - /Camera1
       Splitter Ratio: 0.5058004856109619
     Tree Height: 1008
   - Class: rviz/Help
@@ -301,8 +309,10 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        ar_marker_0:
-          Value: false
+        ar_marker_2:
+          Value: true
+        ar_marker_4:
+          Value: true
         base:
           Value: false
         base_link:
@@ -332,7 +342,7 @@ Visualization Manager:
         d435i_infra2_optical_frame:
           Value: false
         d435i_link:
-          Value: false
+          Value: true
         ee_link:
           Value: false
         forearm_link:
@@ -376,7 +386,7 @@ Visualization Manager:
         world:
           kinect2_link:
             kinect2_rgb_optical_frame:
-              ar_marker_0:
+              ar_marker_2:
                 d435i_link:
                   d435i_accel_frame:
                     d435i_accel_optical_frame:
@@ -396,6 +406,8 @@ Visualization Manager:
                   d435i_infra2_frame:
                     d435i_infra2_optical_frame:
                       {}
+              ar_marker_4:
+                {}
               kinect2_ir_optical_frame:
                 {}
           table:
@@ -431,7 +443,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -448,7 +460,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -461,7 +473,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -471,14 +483,14 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 1
       Size (m): 0.0010000000474974513
       Style: Points
-      Topic: /threeD_cloud
+      Topic: /kinect2/qhd/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
@@ -531,25 +543,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 1.2436820268630981
+      Distance: 1.831702470779419
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.6512956619262695
-        Y: 0.16984663903713226
-        Z: -7.450523753504967e-8
+        X: 0.4838322103023529
+        Y: 0.01989889144897461
+        Z: -1.639122046981356e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.23979948461055756
+      Pitch: -0.02020157501101494
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 0.5517303347587585
+      Yaw: 1.374878168106079
     Saved: ~
 Window Geometry:
   Camera:
@@ -565,7 +577,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002a2000003c2fc0200000009fb000000100044006900730070006c0061007900730300000ce300000027000001b30000042ffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d006500720061010000003d000001fe0000001600fffffffb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067000000003d0000041f0000017d00fffffffb0000000c00430061006d0065007200610100000241000001be0000001600fffffffb0000000c00430061006d0065007200610100000214000001eb0000000000000000000004d8000003c200000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002a2000003c2fc0200000009fb000000100044006900730070006c0061007900730300000d4500000009000001b30000042ffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d006500720061010000003d000001fe0000001600fffffffb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067000000003d0000041f0000017d00fffffffb0000000c00430061006d0065007200610100000241000001be0000001600fffffffb0000000c00430061006d0065007200610100000214000001eb0000000000000000000004d8000003c200000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1920
