@@ -2,7 +2,6 @@
 **  Simple ROS Node
 **/
 #include <ros/ros.h>
-#include <fake_ar_publisher/ARMarker.h>
 #include <roboweld_core/LocalizePart.h>
 #include <tf/transform_listener.h>
 

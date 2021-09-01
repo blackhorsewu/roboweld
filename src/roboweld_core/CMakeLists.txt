@@ -2,22 +2,17 @@ cmake_minimum_required(VERSION 2.8.3)
 project(roboweld_core)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  fake_ar_publisher
   geometry_msgs
   message_generation
   tf
   moveit_ros_planning_interface
-  ur5_demo_descartes
-  descartes_trajectory
-  descartes_planner
-  descartes_utilities
   trajectory_msgs
   eigen_conversions
   sensor_msgs
@@ -127,15 +122,10 @@ catkin_package(
 #  LIBRARIES roboweld_core
  CATKIN_DEPENDS
    roscpp
-   fake_ar_publisher
    message_runtime
    geometry_msgs
    tf
    moveit_ros_planning_interface
-   ur5_demo_descartes
-   descartes_trajectory
-   descartes_planner
-   descartes_utilities
    trajectory_msgs
    eigen_conversions
 #  DEPENDS system_lib
@@ -185,7 +175,6 @@ add_executable(vision_node src/vision_node.cpp)
 add_executable(perception_node src/perception_node.cpp)
 add_executable(rs_percept src/rs_percept.cpp)
 add_executable(roboweld_node src/roboweld_node.cpp)
-add_executable(descartes_node src/descartes_node.cpp)
 add_executable(move_robot src/move_robot.cpp) # used for ROS2 bridging support
 ## add_executable(perception_node src/perception_node.cpp)
 
@@ -201,7 +190,6 @@ add_dependencies(vision_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 add_dependencies(perception_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(rs_percept ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(roboweld_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(descartes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(move_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -209,7 +197,6 @@ target_link_libraries(vision_node ${catkin_LIBRARIES})
 target_link_libraries(perception_node ${catkin_LIBRARIES})
 target_link_libraries(rs_percept ${catkin_LIBRARIES})
 target_link_libraries(roboweld_node ${catkin_LIBRARIES})
-target_link_libraries(descartes_node ${catkin_LIBRARIES})
 target_link_libraries(move_robot ${catkin_LIBRARIES})
 ## target_link_libraries(perception_node ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 

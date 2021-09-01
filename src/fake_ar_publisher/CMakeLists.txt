@@ -10,14 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   visualization_msgs
-#  Eigen3
-  moveit_visual_tools
-  rviz_visual_tools
-  moveit_ros_planning_interface
 )
 
 include_directories(${catkin_INCLUDE_DIRS})
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

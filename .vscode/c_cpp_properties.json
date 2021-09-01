@@ -6,8 +6,9 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "/opt/ros/melodic/include/**",
-                "/usr/include/**"
+                "/opt/ros/noetic/include/**",
+                "/usr/include/**",
+                "${workspaceFolder}/devel/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
