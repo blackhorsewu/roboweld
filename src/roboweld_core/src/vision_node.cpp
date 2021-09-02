@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <roboweld_core/LocalizePart.h>
 #include <tf/transform_listener.h>
+#include <fake_ar_publisher/ARMarker.h>
 
 class Localizer
 {

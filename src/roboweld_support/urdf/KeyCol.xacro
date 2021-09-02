@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+
+<!-- 
+  The xacro file for the UR5 holding the Keyence LJ7200 laser scanner as End Effector
+  for the Column workpiece
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="roboweld" >
+
+  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <!-- ur5 -->
+  
+  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:arg name="kinematics_config" default="$(find ur_description)/config/ur5_default.yaml"/>
+  <xacro:ur5_robot prefix="" joint_limited="true"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+  />
+
+  <link name="world" />
+
+<!-- There are:-
+     1. The World, everything lives in it.
+     2. The Welding table, our robot arm is installed on it.
+     3. The UR5, our robot arm, with the Straight Fronius Torch as its end effector.
+     4. The Keyence LJ7200 Laser Scanner attached to the torch holder.
+-->
+
+  <!-- defining tool -->
+  <!-- Welding torch holder with the Straight Torch -->
+
+  <link name="tool0">  <!-- Actually this is the Fronius Straight Torch held by the holder -->
+    <visual>
+      <geometry>
+        <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+        <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+        <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
+    </collision>
+  </link>
+
+  <link name="lj_v7200_frame">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://keyence_experimental/meshes/visual/lj_v7200.dae"/>
+      </geometry>
+      <material name="dark grey">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://keyence_experimental/meshes/collision/lj_v7200.stl"/>
+      </geometry>
+      <material name="dark grey">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </collision>
+  </link>
+
+  <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
+    <origin xyz="0.062 -0.105 0.1599" rpy="0 ${pi} ${-pi/2.0}"/>
+    <parent link="wrist_3_link"/>
+    <child link="lj_v7200_frame"/>
+  </joint>
+
+  <xacro:property name="ref_dist_a" value="0.2"/> <!-- This for the Keyence Scanner -->
+
+  <!-- Optical frame -->
+  <link name="lj_v7200_optical_frame"/>
+  <joint name="optical_frame_joint" type="fixed">
+    <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
+    <parent link="lj_v7200_frame"/>
+    <child link="lj_v7200_optical_frame"/>
+  </joint>
+
+  <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
+    <origin xyz="0 -0.105 0.360" rpy="0 0 ${pi}"/>
+    <parent link="wrist_3_link"/>
+    <child link="tool0"/>
+  </joint>
+
+  <!-- This is the link for the tail cable of the torch -->
+  <link name="tail" >
+    <visual>
+       <geometry>
+         <cylinder length="0.1" radius="0.0125"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+       <geometry>
+         <cylinder length="0.1" radius="0.0125"/>
+       </geometry>
+       <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="ee_link-tail_fixed_joint" type="fixed">
+     <origin xyz="-0.08 0 0.115" rpy="0 ${pi/2.0} 0"/>
+     <parent link="ee_link"/>
+     <child link="tail"/>
+  </joint>
+
+  <link name="table">
+    <visual>
+      <geometry>
+        <box size="1.5 1.0 0.1"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+      <material name="Steel">
+        <color rgba="1.0 0.831 0.486 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="1.5 1.0 0.1"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+    </collision>
+  </link>
+
+  <joint name="table_to_robot" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="-0.05 -0.15 0.015" rpy="0.0 0.0 0.0"/>
+
+  </joint>
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0.05 0.15 0.0" rpy="0 0 0"/>
+  </joint>
+
+</robot>
