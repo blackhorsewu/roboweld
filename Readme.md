@@ -15,3 +15,7 @@ In base_realsense_node.cpp, there are some occurences of **find_if** did not hav
 This library is a must for the Keyence Laser Scanner LJ V7200 and must be installed. However, it cannot be put in this **roboweld** workspace because it is not compatible with catkin_make. Therefore, it is necessary to install it in the home directory before compiling roboweld. The source is also backed up in an external hard drive, because the website for it cannot be found anymore!
 
 [libsocket](https://github.com/dermesser/libsocket)
+
+# Change log
+5 May 2022.
+Added a moveit config with the name **stkey_moveit_config**. Here the **stkey** is to indicate that the Keyence Laser Scanner is straight as oppose to one going to construct with a tilted scanner.
