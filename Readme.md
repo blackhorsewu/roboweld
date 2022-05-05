@@ -14,4 +14,4 @@ In base_realsense_node.cpp, there are some occurences of **find_if** did not hav
 **libsocket**
 This library is a must for the Keyence Laser Scanner LJ V7200 and must be installed. However, it cannot be put in this **roboweld** workspace because it is not compatible with catkin_make. Therefore, it is necessary to install it in the home directory before compiling roboweld. The source is also backed up in an external hard drive, because the website for it cannot be found anymore!
 
-https://github.com/dermesser/libsocket
+[libsocket](https://github.com/dermesser/libsocket)
