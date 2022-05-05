@@ -8,3 +8,8 @@ The development was started back in 8 September 2020.
 # Implementation details
 Before anything can be done, it is necessary to set the scene in a URDF. In ROS, the URDF's are usually put in a package **..._support**. So, in this case there should be a package **roboweld_support**. In the folder **roboweld_support** then should have a folder **urdf**. ROS uses an XML macro language **xacro**. With xacro shorter and more readable XML files can by constructed by using macros that expand it to larger XML expressions.
 
+**Realsense-ROS**
+In base_realsense_node.cpp, there are some occurences of **find_if** did not have the std:: prefix. When compiled, the compiler will complain it has not been declared.
+
+**libsocket**
+This library is a must for the Keyence Laser Scanner LJ V7200 and must be installed. However, it cannot be put in this **roboweld** workspace because it is not compatible with catkin_make. Therefore, it is necessary to install it in the home directory before compiling roboweld. The source is also backed up in an external hard drive, because the website for it cannot be found anymore!
