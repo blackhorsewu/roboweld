@@ -17,7 +17,7 @@
   <xacro:arg name="kinematics_config" default="$(find ur_description)/config/ur5_default.yaml"/>
   <xacro:ur5_robot prefix="" joint_limited="true"
     transmission_hw_interface="$(arg transmission_hw_interface)"
-    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+    kinematics_file="${xacro.load_yaml('$(arg kinematics_config)')}"
   />
 
   <link name="world" />
