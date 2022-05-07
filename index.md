@@ -1,6 +1,9 @@
-## RoboWeld
+# RoboWeld
 
-It is a project of CNERC, China National Engineering Research Centre, (Hong Kong Branch) project to conduct Gas Metal Arc Welding (GMAW) using robots.
+It is a project of CNERC, China National Engineering Research Centre, (Hong Kong Branch) to conduct Gas Metal Arc Welding (GMAW) using robots.
+
+## Introduction
+Welding is very important for steel structures in construction. One of the factors that affect quality of welded joints is the steadiness of the welding torch. A robot can move steadily along well defined path with moving speed and orientation under good control. This is the motivation of **RoboWeld**.
 
 You can use the [editor on GitHub](https://github.com/blackhorsewu/roboweld/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
