@@ -1,4 +1,6 @@
-## Welcome to GitHub Pages
+## RoboWeld
+
+It is a project of CNERC, China National Engineering Research Centre, (Hong Kong Branch) project to conduct Gas Metal Arc Welding (GMAW) using robots.
 
 You can use the [editor on GitHub](https://github.com/blackhorsewu/roboweld/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
