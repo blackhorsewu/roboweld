@@ -137,8 +137,12 @@ robot_status_controller:
 
 controller_list:
   - name: ""
-    action_ns: scaled_vel_joint_traj_controller/follow_joint_trajectory
-#    action_ns: joint_trajectory_action
+# For Real Robot use the following
+#    action_ns: scaled_vel_joint_traj_controller/follow_joint_trajectory
+
+# For Simulated Robot in RViz use the following
+    action_ns: joint_trajectory_action
+# End of Choice
     type: FollowJointTrajectory
     joints: [shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint] 
 
