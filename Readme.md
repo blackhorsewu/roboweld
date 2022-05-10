@@ -18,4 +18,4 @@ This library is a must for the Keyence Laser Scanner LJ V7200 and must be instal
 
 # Change log
 5 May 2022.
-Added a moveit config with the name **stkey_moveit_config**. Here the **stkey** is to indicate that the Keyence Laser Scanner is straight as oppose to one going to construct with a tilted scanner.
+Added a moveit config with the name <mark >stkey_moveit_config</mark>. Here the <mark>stkey</mark> is to indicate that the Keyence Laser Scanner is straight as oppose to one going to construct with a tilted scanner.
