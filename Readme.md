@@ -16,6 +16,11 @@ This library is a must for the Keyence Laser Scanner LJ V7200 and must be instal
 
 [libsocket](https://github.com/dermesser/libsocket)
 
+**Keyence Laser Scanner LJ V7200**
+There is a ROS driver for it - [keyence experimental](https://github.com/ros-industrial/keyence_experimental). There the driver proper **keyence_driver_node** which will startup the driver, provided the ip address of the scanner controller is supplied as a parameter. 
+
+It is deceided not to touch the source of this node. Any usage of the scanner should be done by subscribing to the point cloud topic (**/profiles**) published by it. This will separate the development of this project and the updates to this node by the driver developer. 
+
 # Change log
 5 May 2022.
-Added a moveit config with the name <mark >stkey_moveit_config</mark>. Here the <mark>stkey</mark> is to indicate that the Keyence Laser Scanner is straight as oppose to one going to construct with a tilted scanner.
+Added a moveit config with the name **stkey_moveit_config**. Here the **stkey** is to indicate that the Keyence Laser Scanner is straight as oppose to one going to construct with a tilted scanner.
