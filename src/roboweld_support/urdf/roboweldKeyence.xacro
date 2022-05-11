@@ -1,7 +1,18 @@
 <?xml version="1.0"?>
 
 <!-- 
-  The xacro file for the UR5 holding the Keyence LJ7200 laser scanner as End Effector
+  The xacro file for the UR5 holding the Keyence LJ V7200 laser scanner
+  It was created by:
+  Victor W H Wu, on
+  11 May 2022.
+  For:
+  The Chinese National Engineering Research Centre for Steel Construction
+  (Hong Kong Branch)   Robotic Welding Division
+
+  NOTE: This version the Laser Scanner is pointing at the workpiece in the same
+  ====
+  direction as the Straight Welding Torch. There should be another version that
+  points the Laser Scanner to the workpiece at 27 degree from the Torch.
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
@@ -163,39 +174,8 @@
     <child link="lj_v7200_frame"/>
   </joint>
 
-  <xacro:property name="ref_dist_a" value="0.2"/>
-<!--
   <xacro:include filename="$(find keyence_experimental)/urdf/lj_v7200_macro.xacro"/>
   <xacro:lj_v7200 prefix=""/>
--->
-  <link name="lj_v7200_frame">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://keyence_experimental/meshes/visual/lj_v7200.dae"/>
-      </geometry>
-      <material name="dark grey">
-        <color rgba="0.2 0.2 0.2 1"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://keyence_experimental/meshes/collision/lj_v7200.stl"/>
-      </geometry>
-      <material name="dark grey">
-        <color rgba="0.2 0.2 0.2 1"/>
-      </material>
-    </collision>
-  </link>
-<!--
-  <link name="lj_v7200_optical_frame"/>
-  <joint name="optical_frame_joint" type="fixed">
-    <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
-    <parent link="lj_v7200_frame"/>
-    <child link="lj_v7200_optical_frame"/>
-  </joint>
--->
 
 <!-- 7. The RealSense D435i attached to the torch holder. NOT IN USE-->
 <!-- Import the realsense D435i description -->
@@ -203,6 +183,5 @@
   <xacro:sensor_d435 parent="ee_link" use_nominal_extrinsics="true" name="d435i">
     <origin xyz="0.18515 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
   </xacro:sensor_d435>
-
 
 </robot>
