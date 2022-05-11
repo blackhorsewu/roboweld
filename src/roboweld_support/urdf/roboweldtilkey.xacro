@@ -170,8 +170,7 @@
 <!-- 6. The Keyence LJ7200 Laser Scanner attached to the torch holder. -->
 
   <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
-<!--    <origin xyz="0.062 -0.105 0.1599" rpy="0 ${pi} ${-pi/2.0}"/> -->
-    <origin xyz="0.11692 -0.105 0.18224" rpy="0 ${pi} ${-pi/2.0}"/> <!-- for tilted scanner -->
+    <origin xyz="0.11692 -0.105 0.18224" rpy="-0.471238898038469 ${pi} ${-pi/2.0}"/> <!-- for tilted scanner -->
     <parent link="wrist_3_link"/>
     <child link="lj_v7200_frame"/>
   </joint>
