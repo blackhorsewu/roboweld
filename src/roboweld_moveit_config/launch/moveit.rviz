@@ -26,10 +26,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /MotionPlanning1
-        - /MotionPlanning1/Scene Geometry1
-        - /MotionPlanning1/Scene Robot1
         - /MotionPlanning1/Planning Request1
-        - /MotionPlanning1/Planned Path1
         - /MarkerArray2
       Splitter Ratio: 0.4188481569290161
     Tree Height: 542
@@ -237,7 +234,7 @@ Visualization Manager:
         Colliding Link Color: 255; 0; 0
         Goal State Alpha: 1
         Goal State Color: 250; 128; 0
-        Interactive Marker Size: 0.30000001192092896
+        Interactive Marker Size: 0.20000000298023224
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
         Query Goal State: false
@@ -485,25 +482,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 3.225492477416992
+      Distance: 2.838433265686035
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.4901147484779358
-        Y: -0.7120141983032227
-        Z: 2.273479367431719e-6
+        X: 1.1539894342422485
+        Y: -0.5567371845245361
+        Z: 2.0350607883301564e-6
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5797975063323975
+      Pitch: 0.2897980213165283
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 5.875022888183594
+      Yaw: 5.630008697509766
     Saved: ~
 Window Geometry:
   Camera:
