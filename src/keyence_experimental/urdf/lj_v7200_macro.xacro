@@ -29,8 +29,8 @@
     <link name="${prefix}lj_v7200_optical_frame"/>
     <joint name="optical_frame" type="fixed">
       <origin xyz="0 0 ${ref_dist_a}" rpy="0 0 0"/>
-      <child link="${prefix}lj_v7200_optical_frame"/>
-      <parent link="${prefix}lj_v7200_frame"/>
+      <parent link="${prefix}lj_v7200_optical_frame"/>
+      <child link="${prefix}lj_v7200_frame"/>
    </joint>
   </xacro:macro>
 </robot>

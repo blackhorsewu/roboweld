@@ -72,6 +72,7 @@ add_dependencies(
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+
 add_executable(
   concave_scanner
   src/concave_scanner.cpp
@@ -81,6 +82,7 @@ add_dependencies(
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+
 add_executable(
   convex_scanner
   src/convex_scanner.cpp
@@ -90,6 +92,7 @@ add_dependencies(
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+
 add_executable(
   keyence_driver_node
   src/keyence_driver_node.cpp
@@ -99,6 +102,7 @@ add_dependencies(
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+
 target_link_libraries(
   after_1st_scanner
   keyence_impl

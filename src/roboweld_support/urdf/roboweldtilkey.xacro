@@ -170,9 +170,9 @@
 <!-- 6. The Keyence LJ7200 Laser Scanner attached to the torch holder. -->
 
   <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
-    <origin xyz="0.11692 -0.105 0.18224" rpy="-0.471238898038469 ${pi} ${-pi/2.0}"/> <!-- for tilted scanner -->
+    <origin xyz="0.00433 -0.105 0.350441" rpy="-0.471238898038469 ${pi} ${-pi/2.0}"/> <!-- for tilted scanner -->
     <parent link="wrist_3_link"/>
-    <child link="lj_v7200_frame"/>
+    <child link="lj_v7200_optical_frame"/>
   </joint>
 
   <xacro:include filename="$(find keyence_experimental)/urdf/lj_v7200_macro.xacro"/>

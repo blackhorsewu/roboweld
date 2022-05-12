@@ -6,9 +6,10 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "/opt/ros/noetic/include/**",
+                "/opt/ros/melodic/include/**",
                 "/usr/include/**",
-                "${workspaceFolder}/devel/include"
+                "${workspaceFolder}/devel/include",
+                "${workspaceFolder}/src/keyence_experimental/keyence_library/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
