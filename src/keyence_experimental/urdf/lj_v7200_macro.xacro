@@ -31,6 +31,6 @@
       <origin xyz="0 0 ${ref_dist_a}" rpy="0 0 0"/>
       <parent link="${prefix}lj_v7200_optical_frame"/>
       <child link="${prefix}lj_v7200_frame"/>
-   </joint>
+    </joint>
   </xacro:macro>
 </robot>
