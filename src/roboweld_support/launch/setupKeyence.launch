@@ -2,13 +2,13 @@
 <launch>
   <include file="$(find roboweld_moveit_config)/launch/roboweld_planning_executionKeyence.launch">
 
-<!-- Simulated Robot in RViz -->
+<!-- Simulated Robot in RViz 
     <arg name="sim" default="true" />
-
-<!-- Real Robot
+-->
+<!-- Real Robot -->
     <arg name="sim" default="false"/>
     <arg name="robot_ip" value="192.168.0.103"/>
- -->
+ 
   </include>
 <!--
   <node name="fake_ar_publisher" pkg="fake_ar_publisher" type="fake_ar_publisher_node" />

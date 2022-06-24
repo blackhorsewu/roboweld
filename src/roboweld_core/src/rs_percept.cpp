@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
    *                                                                               *
    *  PASSTHROUGH FILTER(S)                                                        *
    *                                                                               *
-   *  Concentrate on the working area. Crop the image to focus on our intereset,   *
+   *  Concentrate on the working area. Crop the image to focus on our interest,    *
    *  that is the welding groove.                                                  *
    *  We are trying to crop the image from the perspective of the camera.          *
    *  The x direction is pointing to the right of the camera                       *
