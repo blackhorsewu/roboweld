@@ -2,6 +2,16 @@
 
 <!-- 
   The xacro file for the UR5 holding the Keyence LJ7200 laser scanner as End Effector
+
+  24 June, 2022. (Friday)
+  Want to try moving the UR5 by hand and tidy up the scene.
+  This means removing 
+  1. Kinect 2 camera - which is not used for a long time and removed physically from
+  the scene.
+  2. Keyence laser scanner - this should be in another urdf with it.
+  
+  Then put the Realsense D435i in the right place.
+
 -->
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
@@ -17,7 +27,7 @@
   <xacro:arg name="kinematics_config" default="$(find ur_description)/config/ur5_default.yaml"/>
   <xacro:ur5_robot prefix="" joint_limited="true"
     transmission_hw_interface="$(arg transmission_hw_interface)"
-    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+    kinematics_file="${xacro.load_yaml('$(arg kinematics_config)')}"
   />
 
   <link name="world" />
@@ -25,102 +35,43 @@
 <!-- There are:-
      1. The World, everything lives in it.
      2. The Welding table, our robot arm is installed on it.
-     3. The Kinect V2, RGBD camera provides the point clouds that we need.
+
+Removed     3. The Kinect V2, RGBD camera provides the point clouds that we need.
+
      4. The UR5, our robot arm, with the Straight Fronius Torch as its end effector.
-     5. The Keyence LJ7200 Laser Scanner attached to the torch holder.
+
+Removed     5. The Keyence LJ7200 Laser Scanner attached to the torch holder.
+
+Relocated
      6. The RealSense D435i attached to the torch holder.
 -->
 
   <!-- defining tool -->
   <!-- Welding torch holder with the Straight Torch -->
 
-  <xacro:property name="ref_dist_a" value="0.2"/>
-
-  <!-- Actually this is the Fronius Straight Torch held by the holder 
-  <link name="tool0">  
-      <visual>
-        <geometry>
-          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
-                scale="0.001 0.001 0.001"/>
-        </geometry>
-          <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
-      </visual>
-      <collision>
-        <geometry>
-          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
-                scale="0.001 0.001 0.001"/>
-        </geometry>
-          <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
-      </collision>
-  </link>
-  End -->
-
   <!-- Actually this is the Fronius Straight Torch held by the holder, the Realsense camera
-       Orientation has been changed to face the tip of the torch -->
+       Orientation has been changed to face the tip of the torch
+
+      24 June, 2022. (Friday)
+      This is being changed back to face directly to workpiece
+
+  -->
   <link name="tool0">  
       <visual>
         <geometry>
-          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan2.stl"
+          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
                 scale="0.001 0.001 0.001"/>
         </geometry>
           <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan2.stl"
+          <mesh filename="package://roboweld_support/meshes/collision/STorchRCamKScan.stl"
                 scale="0.001 0.001 0.001"/>
         </geometry>
           <origin xyz="0 0 0" rpy="0 ${pi} 0"/>
       </collision>
   </link>
-  <!-- End -->
-
-  <link name="lj_v7200_frame">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://keyence_experimental/meshes/visual/lj_v7200.dae"/>
-      </geometry>
-      <material name="dark grey">
-        <color rgba="0.2 0.2 0.2 1"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://keyence_experimental/meshes/collision/lj_v7200.stl"/>
-      </geometry>
-      <material name="dark grey">
-        <color rgba="0.2 0.2 0.2 1"/>
-      </material>
-    </collision>
-  </link>
-
-<!--
-  <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
-    <origin xyz="0.062 -0.105 0.1599" rpy="0 ${pi} ${-pi/2.0}"/>
-    <parent link="wrist_3_link"/>
-    <child link="lj_v7200_frame"/>
-  </joint>
--->
-  <!-- The Keyence Laser Scanner rowed (tilted around the X axis) by 27 degree -->
-  <joint name="wrist_3_link-lj_v7200_fixed_joint" type="fixed">
-  
-    <origin xyz="0.11692 -0.105 0.173" rpy="-0.471233898038469 ${pi} ${-pi/2.0}"/>
-  <!--
-    <origin xyz="0.11692 -0.105 0.18224" rpy="-0.5115527743863 ${pi} ${-pi/2.0}"/>
-  -->  
-    <parent link="wrist_3_link"/>
-    <child link="lj_v7200_frame"/>
-  </joint>
-
-  <!-- The Laser Scanner Optical frame -->
-  <link name="lj_v7200_optical_frame"/>
-  <joint name="optical_frame_joint" type="fixed">
-    <origin xyz="0 0 -${ref_dist_a}" rpy="0 0 0"/>
-    <parent link="lj_v7200_frame"/>
-    <child link="lj_v7200_optical_frame"/>
-  </joint>
 
   <!-- The pose of the Welding Torch (Tool0) with respect to Wrist-3-link is defined here. -->
   <joint name="wrist_3_link-tool0_fixed_joint" type="fixed">
@@ -156,17 +107,14 @@
   <xacro:sensor_d435 parent="ee_link" use_nominal_extrinsics="true" name="d435i">
 <!--    
     <origin xyz="0.16026 0 0.01829" rpy="${pi} ${-pi} ${pi}"/>
-
-    <origin xyz="0.18515 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
-
-    <origin xyz="0.19738 0 0.00436" rpy="${pi} -2.827433388230814 ${pi}"/>
 -->
-
+    <origin xyz="0.18515 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
+<!--
+    <origin xyz="0.19185 0 0.0225" rpy="${pi} ${-pi} ${pi}"/>
+    <origin xyz="0.19738 0 0.00436" rpy="${pi} -2.827433388230814 ${pi}"/>
     <origin xyz="0.20038 0.08064 0.105" rpy="${-pi/2} ${pi} 2.827433388230814"/>
+-->
   </xacro:sensor_d435>
-
-  <xacro:include filename="$(find kinect2_description)/urdf/kinect2_urdf.xacro" />
-  <xacro:kinect2 prefix=""/>
 
   <link name="table">
     <visual>
@@ -192,41 +140,10 @@
     <origin xyz="-0.6 0.0 0.015" rpy="0.0 0.0 ${pi}"/>
   </joint>
 
-
-  <!-- Optical frame -->
-  <link name="kinect2_rgb_optical_frame"/>
-  <joint name="rgb_optical_frame" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <parent link="kinect2_link"/> <!-- This link is defined in the kinect2_urdf.xacro file. -->
-    <child link="kinect2_rgb_optical_frame"/>
-  </joint>
-
-    <link name="kinect2_ir_optical_frame"/>
-    <joint name="kinect2_rgb_joint" type="fixed">
-<!--
-      <origin xyz="-0.0517134766043 0.000128911761804 0.000705039229472" rpy="0.00257173763296 -0.00373970390715 0.00528936886629"/>
--->
-      <origin xyz="-0.0495134766043 0.000128911761804 0.0" rpy="0.00257173763296 -0.00373970390715 0.00528936886629"/>
-      <parent link="kinect2_rgb_optical_frame"/>
-      <child link="kinect2_ir_optical_frame"/>
-    </joint>
-
-
   <joint name="world_to_table" type="fixed">
     <parent link="world"/>
     <child link="table"/>
     <origin xyz="0.6 0.0 0.0" rpy="0 0 0"/>
   </joint>
 
-<!-- We do not describe anything between the world and the camera. -->
-  <joint name="world_to_camera" type="fixed">
-    <parent link="world"/>
-    <child link="kinect2_link"/>
-<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="0 3.14159 1.5707"/>
-      <origin xyz="0.050035 -0.4255 1.1515" rpy="-0.005 3.145 3.155"/>
-      <origin xyz="-0.050035 -0.4255 1.1515" rpy="-0.005 3.145 0.0134"/>
-      <origin xyz="-0.0671726 -0.438413 1.215087" rpy="-0.005 3.145 0.0134"/> -->
-      <origin xyz="0.610 0.00 1.135" rpy="3.144 -0.01 4.71"/>
-<!--      <origin xyz="0.380425 0.000035 1.17336" rpy="-2.9554254 0.1372145 1.5570305"/> -->
-  </joint>
 </robot>
