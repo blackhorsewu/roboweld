@@ -8,7 +8,7 @@ of the welding scene.
 Operators are exptected to move the End Effector of the UR5, in FreeDrive mode, manually to see the workpiece.
 The system is developed on the ROS platform. It uses the RViz package of ROS to visualise the welding scene.
 
-This change of approach was on the 25th June, 2022.
+This change of approach was started on the 25th June, 2022.
 
 # Implementation details
 Before anything can be done, it is necessary to set the scene in a URDF. 
